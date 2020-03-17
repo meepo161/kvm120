@@ -178,19 +178,21 @@ class MainView : View("КВМ-120") {
                                 button("Применить") {
                                     action {
                                         CommunicationModel.avem4VoltmeterController.entryConfigurationMod()
-                                        var timeAveraging = 600.0f
+                                        var timeAveraging = 1.0f
                                         try {
-                                            timeAveraging = tfTimeAveraging.text.toFloat()
+                                            timeAveraging = tfTimeAveraging.text.replace(',', '.').toFloat()
                                         } catch (e: Exception) {
                                             Toast.makeText("Неверное значение времени усреднения")
                                                 .show(Toast.ToastType.ERROR)
                                         }
                                         CommunicationModel.avem4VoltmeterController.setTimeAveraging(timeAveraging)
-                                        sleep(100)
-                                        tfTimeAveraging.text = String.format(
-                                            "%.1f",
-                                            CommunicationModel.avem4VoltmeterController.readTimeAveraging()
-                                        )
+                                        Platform.runLater {
+                                            sleep(100)
+                                            tfTimeAveraging.text = String.format(
+                                                "%.1f",
+                                                CommunicationModel.avem4VoltmeterController.readTimeAveraging()
+                                            )
+                                        }
                                     }
                                 }
                             }
