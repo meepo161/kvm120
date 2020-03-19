@@ -28,8 +28,8 @@ class Kvm120 : App(MainView::class, Styles::class) {
     }
 
     private fun initializeSingletons() {
-        ModbusConnection
-        CommunicationModel
+//        ModbusConnection
+//        CommunicationModel
     }
 
     override fun stop() {

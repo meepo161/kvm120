@@ -5,19 +5,22 @@ import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.control.TableView
 import javafx.stage.FileChooser
+import javafx.stage.Modality
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.transactions.transaction
 import ru.avem.kvm120.database.entities.Protocol
 import ru.avem.kvm120.database.entities.ProtocolsTable
 import ru.avem.kvm120.protocol.saveProtocolAsWorkbook
+import ru.avem.kvm120.utils.Singleton
 import ru.avem.kvm120.utils.openFile
 import tornadofx.*
 import tornadofx.controlsfx.confirmNotification
 import java.io.File
 
 class ProtocolListWindow : View("Протоколы") {
-    private var tableViewProtocols: TableView<Protocol> by singleAssign()
+    public var tableViewProtocols: TableView<Protocol> by singleAssign()
     private lateinit var protocols: ObservableList<Protocol>
+    public var currentItem = ""
     override fun onDock() {
         protocols = transaction {
             Protocol.all().toList().observable()
@@ -71,15 +74,21 @@ class ProtocolListWindow : View("Протоколы") {
                 button("Открыть") {
                     action {
                         if (tableViewProtocols.selectedItem != null) {
-                            transaction {
+                            Singleton.currentProtocol = transaction {
                                 Protocol.find {
                                     ProtocolsTable.id eq tableViewProtocols.selectedItem!!.id
                                 }.toList().observable()
                             }.first()
 
-                            close()
-                            saveProtocolAsWorkbook()
-                            openFile(File("protocol.xlsx"))
+                            find<GraphHistoryWindow>().openModal(
+                                modality = Modality.APPLICATION_MODAL, escapeClosesWindow = true,
+                                resizable = false, owner = this@ProtocolListWindow.currentWindow
+                            )
+//
+//                            close()
+//                            saveProtocolAsWorkbook()
+//                            openFile(File("protocol.xlsx"))
+//                        }
                         }
                     }
                 }

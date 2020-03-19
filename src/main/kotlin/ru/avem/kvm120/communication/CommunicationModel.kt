@@ -36,7 +36,7 @@ object CommunicationModel : Observer {
                             when (it) {
                                 is AVEM4VoltmeterController -> {
                                     try {
-                                        it.readValues()
+//                                        it.readValues()
 //                                        it.readTimeAveraging()
 //                                        it.readDots()
                                         it.isResponding = true
