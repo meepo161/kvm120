@@ -145,10 +145,10 @@ class AVEM4VoltmeterController(private val unitID: UnitID, observer: Observer) :
     }
 
     fun setTimeAveraging(time: Float) {
-        val dataBuffer = ByteBuffer.allocate(4).putFloat(time).flip() as ByteBuffer
+        val dataBuffer = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putFloat(time).flip() as ByteBuffer
         try {
-            ModbusConnection.writeSingleRegister(unitID.id, TIME_MEASURE, SimpleRegister(dataBuffer.getShort(1)))
-            ModbusConnection.writeSingleRegister(unitID.id, TIME_MEASURE + 1, SimpleRegister(dataBuffer.getShort(0)))
+            ModbusConnection.writeSingleRegister(unitID.id, 0x10C8, SimpleRegister(dataBuffer.getShort(1)))
+            ModbusConnection.writeSingleRegister(unitID.id, 0x10C9, SimpleRegister(dataBuffer.getShort(0)))
         } catch (e: Exception) {
             isResponding = false
         }

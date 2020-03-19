@@ -92,54 +92,54 @@ class ProtocolListWindow : View("Протоколы") {
                         }
                     }
                 }
-                button("Сохранить как") {
-                    action {
-                        if (tableViewProtocols.selectedItem != null) {
-                            val files = chooseFile(
-                                "Выберите директорию для сохранения",
-                                arrayOf(FileChooser.ExtensionFilter("XSLX Files (*.xlsx)", "*.xlsx")),
-                                FileChooserMode.Save,
-                                this@ProtocolListWindow.currentWindow
-                            ) {
-                                this.initialDirectory = File(System.getProperty("user.home"))
-                            }
-
-                            if (files.isNotEmpty()) {
-                                saveProtocolAsWorkbook(files.first().absolutePath)
-                                confirmNotification(
-                                    "Готово",
-                                    "Успешно сохранено",
-                                    Pos.BOTTOM_CENTER,
-                                    owner = this@ProtocolListWindow.currentWindow
-                                )
-                            }
-                        }
-                    }
-                }
-                button("Сохранить все") {
-                    action {
-                        if (tableViewProtocols.items.size > 0) {
-                            val dir = chooseDirectory(
-                                "Выберите директорию для сохранения",
-                                File(System.getProperty("user.home")),
-                                this@ProtocolListWindow.currentWindow
-                            )
-
-                            if (dir != null) {
-                                tableViewProtocols.items.forEach {
-                                    val file = File(dir, "${it.id.value}.xlsx")
-                                    saveProtocolAsWorkbook(file.absolutePath)
-                                }
-                                confirmNotification(
-                                    "Готово",
-                                    "Успешно сохранено",
-                                    Pos.BOTTOM_CENTER,
-                                    owner = this@ProtocolListWindow.currentWindow
-                                )
-                            }
-                        }
-                    }
-                }
+//                button("Сохранить как") {
+//                    action {
+//                        if (tableViewProtocols.selectedItem != null) {
+//                            val files = chooseFile(
+//                                "Выберите директорию для сохранения",
+//                                arrayOf(FileChooser.ExtensionFilter("XSLX Files (*.xlsx)", "*.xlsx")),
+//                                FileChooserMode.Save,
+//                                this@ProtocolListWindow.currentWindow
+//                            ) {
+//                                this.initialDirectory = File(System.getProperty("user.home"))
+//                            }
+//
+//                            if (files.isNotEmpty()) {
+//                                saveProtocolAsWorkbook(files.first().absolutePath)
+//                                confirmNotification(
+//                                    "Готово",
+//                                    "Успешно сохранено",
+//                                    Pos.BOTTOM_CENTER,
+//                                    owner = this@ProtocolListWindow.currentWindow
+//                                )
+//                            }
+//                        }
+//                    }
+//                }
+//                button("Сохранить все") {
+//                    action {
+//                        if (tableViewProtocols.items.size > 0) {
+//                            val dir = chooseDirectory(
+//                                "Выберите директорию для сохранения",
+//                                File(System.getProperty("user.home")),
+//                                this@ProtocolListWindow.currentWindow
+//                            )
+//
+//                            if (dir != null) {
+//                                tableViewProtocols.items.forEach {
+//                                    val file = File(dir, "${it.id.value}.xlsx")
+//                                    saveProtocolAsWorkbook(file.absolutePath)
+//                                }
+//                                confirmNotification(
+//                                    "Готово",
+//                                    "Успешно сохранено",
+//                                    Pos.BOTTOM_CENTER,
+//                                    owner = this@ProtocolListWindow.currentWindow
+//                                )
+//                            }
+//                        }
+//                    }
+//                }
                 button("Удалить") {
                     action {
                         if (tableViewProtocols.selectedItem != null) {

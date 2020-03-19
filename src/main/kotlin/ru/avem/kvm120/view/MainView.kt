@@ -118,7 +118,7 @@ class MainView : View("КВМ-120") {
                                 vbox(spacing = 32.0) {
                                     alignmentProperty().set(Pos.CENTER)
 
-                                    label("Действующее значение")
+                                    label("Действующее значение, В")
                                     tfRms = textfield {
                                         alignmentProperty().set(Pos.CENTER)
                                         prefHeight = 200.0
@@ -127,7 +127,7 @@ class MainView : View("КВМ-120") {
                                 vbox(spacing = 32.0) {
                                     alignmentProperty().set(Pos.CENTER)
 
-                                    label("Среднее значение")
+                                    label("Среднее значение, В")
                                     tfAvr = textfield {
                                         alignmentProperty().set(Pos.CENTER)
                                         prefHeight = 200.0
@@ -137,7 +137,7 @@ class MainView : View("КВМ-120") {
                                 vbox(spacing = 32.0) {
                                     alignmentProperty().set(Pos.CENTER)
 
-                                    label("Амлитудное значение")
+                                    label("Амлитудное значение, В")
                                     tfAmp = textfield {
                                         alignmentProperty().set(Pos.CENTER)
                                         prefHeight = 200.0
@@ -162,7 +162,7 @@ class MainView : View("КВМ-120") {
                                 vbox(spacing = 32.0) {
                                     alignmentProperty().set(Pos.CENTER)
 
-                                    label("Частота")
+                                    label("Частота, Гц")
                                     tfFreq = textfield {
                                         alignmentProperty().set(Pos.CENTER)
                                         prefHeight = 200.0
@@ -172,7 +172,7 @@ class MainView : View("КВМ-120") {
                             }
                             hbox(spacing = 16.0) {
                                 alignmentProperty().set(Pos.CENTER)
-                                label("Время усреднения данных:")
+                                label("Время усреднения данных, мс:")
                                 tfTimeAveraging = textfield {
                                 }
                                 button("Применить") {
@@ -227,6 +227,7 @@ class MainView : View("КВМ-120") {
                                                 isDisable = true
                                                 val listOfDots = CommunicationModel.avem4VoltmeterController.readDotsF()
                                                 drawGraphFormVoltage(listOfDots)
+                                                recordFormGraphInDB(listOfDots)
                                                 isDisable = false
                                             }.start()
                                         } else {
@@ -289,15 +290,22 @@ class MainView : View("КВМ-120") {
     }.addClass(Styles.blueTheme, medium)
 
     private fun recordGraphInDB() {
+        listOfValues.clear()
         Thread {
-            while (!isStop) {
-                if (!isPause) {
-                    listOfValues.add(tfValueOnGraph.text)
-                }
+            while (isStart) {
+                listOfValues.add(tfValueOnGraph.text)
                 sleep(100)
             }
             saveProtocolToDB(listOfValues)
         }.start()
+    }
+
+    private fun recordFormGraphInDB(list: List<Float>) {
+        listOfValues.clear()
+        for (i in list.indices) {
+            listOfValues.add(list[i].toString())
+        }
+        saveProtocolToDB(listOfValues)
     }
 
     private fun showProgressIndicator() {

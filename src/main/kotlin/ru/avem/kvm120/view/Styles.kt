@@ -46,7 +46,7 @@ class Styles : Stylesheet() {
         }
 
         megaHard {
-            fontSize = 32.px
+            fontSize = 28.px
             fontWeight = FontWeight.EXTRA_BOLD
         }
 
