@@ -2,7 +2,7 @@ package ru.avem.kvm120.communication
 
 const val CONVERTER_NAME = "CP2103 USB to RS-485"
 const val ENCODING = "rtu"
-const val BAUD_RATE = 38400
+const val BAUD_RATE = 115200
 const val DATABITS = 8
 const val PARITY = 0
 const val STOPBITS = 1

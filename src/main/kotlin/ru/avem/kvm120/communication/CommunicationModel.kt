@@ -24,6 +24,8 @@ object CommunicationModel : Observer {
     var uAvr = 0.0
     var freq = 0.0
     var coef = 0.0
+    var razmah = 0.0
+    var coefAmp = 0.0
     var timeAveraging = 0.0
     var listDots = observableList<Float>()
 
@@ -65,6 +67,8 @@ object CommunicationModel : Observer {
                     AVEM4VoltmeterController.Parameters.VOLTAGE_AMP -> uAmp = value
                     AVEM4VoltmeterController.Parameters.FREQUENCY -> freq = value
                     AVEM4VoltmeterController.Parameters.COEFFICENT_FORM -> coef = value
+                    AVEM4VoltmeterController.Parameters.RAZMAH -> razmah = value
+                    AVEM4VoltmeterController.Parameters.COEFFICENT_AMP -> coefAmp = value
                     AVEM4VoltmeterController.Parameters.TIME_AVERAGING -> timeAveraging = value
                 }
             }

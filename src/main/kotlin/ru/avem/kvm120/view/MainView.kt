@@ -30,6 +30,8 @@ class MainView : View("КВМ-120") {
     var tfAmp: TextField by singleAssign()
     var tfCoef: TextField by singleAssign()
     var tfFreq: TextField by singleAssign()
+    var tfRazmah: TextField by singleAssign()
+    var tfCoefAmp: TextField by singleAssign()
 
     var comboboxNeedValue: ComboBox<String> by singleAssign()
     var rms = "Действующее"
@@ -118,7 +120,7 @@ class MainView : View("КВМ-120") {
                                 vbox(spacing = 32.0) {
                                     alignmentProperty().set(Pos.CENTER)
 
-                                    label("Действующее значение, В")
+                                    label("Действующее значение, кВ")
                                     tfRms = textfield {
                                         alignmentProperty().set(Pos.CENTER)
                                         prefHeight = 200.0
@@ -127,7 +129,7 @@ class MainView : View("КВМ-120") {
                                 vbox(spacing = 32.0) {
                                     alignmentProperty().set(Pos.CENTER)
 
-                                    label("Среднее значение, В")
+                                    label("Среднее значение, кВ")
                                     tfAvr = textfield {
                                         alignmentProperty().set(Pos.CENTER)
                                         prefHeight = 200.0
@@ -137,7 +139,7 @@ class MainView : View("КВМ-120") {
                                 vbox(spacing = 32.0) {
                                     alignmentProperty().set(Pos.CENTER)
 
-                                    label("Амлитудное значение, В")
+                                    label("Амлитудное значение, кВ")
                                     tfAmp = textfield {
                                         alignmentProperty().set(Pos.CENTER)
                                         prefHeight = 200.0
@@ -152,8 +154,8 @@ class MainView : View("КВМ-120") {
                                 vbox(spacing = 32.0) {
                                     alignmentProperty().set(Pos.CENTER)
 
-                                    label("Коэффицент формы")
-                                    tfCoef = textfield {
+                                    label("Коэффициент амплитуды")
+                                    tfCoefAmp = textfield {
                                         alignmentProperty().set(Pos.CENTER)
                                         prefHeight = 200.0
 
@@ -213,7 +215,7 @@ class MainView : View("КВМ-120") {
                             }
                             hbox(spacing = 16.0) {
                                 alignmentProperty().set(Pos.CENTER)
-                                label("График изменения:")
+                                label("График:")
                                 comboboxNeedValue = combobox {
                                 }
                                 btnStart = button("Старт") {
@@ -282,6 +284,44 @@ class MainView : View("КВМ-120") {
                                 animated = false
                                 createSymbols = false
                             }.addClass(Styles.lineChart)
+                        }
+                    }
+                }
+                tab("Дополнительные") {
+                    isClosable = false
+
+                    anchorpane {
+                        vbox(spacing = 32.0) {
+                            anchorpaneConstraints {
+                                leftAnchor = 16.0
+                                rightAnchor = 16.0
+                                topAnchor = 16.0
+                                bottomAnchor = 16.0
+                            }
+
+                            alignmentProperty().set(Pos.CENTER)
+                            hbox(spacing = 32.0) {
+                                alignmentProperty().set(Pos.CENTER)
+                                vbox(spacing = 32.0) {
+                                    alignmentProperty().set(Pos.CENTER)
+
+                                    label("Размах (двойная амплитуда), кВ")
+                                    tfRazmah = textfield {
+                                        alignmentProperty().set(Pos.CENTER)
+                                        prefHeight = 200.0
+                                    }.addClass(Styles.bigger)
+                                }
+                                vbox(spacing = 32.0) {
+                                    alignmentProperty().set(Pos.CENTER)
+
+                                    label("Коэффицент формы")
+                                    tfCoef = textfield {
+                                        alignmentProperty().set(Pos.CENTER)
+                                        prefHeight = 200.0
+
+                                    }.addClass(Styles.bigger)
+                                }
+                            }
                         }
                     }
                 }

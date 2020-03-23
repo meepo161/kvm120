@@ -30,6 +30,8 @@ class MainViewController : Controller() {
                     view.tfAmp.text = String.format("%.4f", CommunicationModel.uAmp)
                     view.tfCoef.text = String.format("%.4f", CommunicationModel.coef)
                     view.tfFreq.text = String.format("%.4f", CommunicationModel.freq)
+                    view.tfRazmah.text = String.format("%.4f", CommunicationModel.razmah)
+                    view.tfCoefAmp.text = String.format("%.4f", CommunicationModel.coefAmp)
                 }
                 ModbusUtil.sleep(100)
             }

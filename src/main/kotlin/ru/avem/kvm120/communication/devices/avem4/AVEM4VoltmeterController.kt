@@ -30,6 +30,8 @@ class AVEM4VoltmeterController(private val unitID: UnitID, observer: Observer) :
         VOLTAGE_RMS,
         FREQUENCY,
         COEFFICENT_FORM,
+        RAZMAH,
+        COEFFICENT_AMP,
         TIME_AVERAGING
     }
 
@@ -83,6 +85,30 @@ class AVEM4VoltmeterController(private val unitID: UnitID, observer: Observer) :
         return dots
     }
 
+//    fun readDotsF(): List<Float> {
+////        stopRewriteDotesFlag()
+//        val startRegister = 6656
+//        val endRegister = startRegister + 2200
+//        val dots = mutableListOf<Float>()
+//        for (registerIndex in startRegister..endRegister - 50 step 50) {
+//            try {
+//                val shorts = ModbusConnection.readInputRegisters(unitID.id, registerIndex, 50)
+//                for (index in shorts.indices step 10) {
+//                    dots.add(
+//                        (ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN)
+//                            .putShort(shorts[index].toShort())
+//                            .putShort(shorts[index + 1].toShort())
+//                            .flip() as ByteBuffer)
+//                            .float
+//                    )
+//                }
+//            } catch (e: Exception) {
+//            }
+//        }
+////        startRewriteDotesFlag()
+//        return dots
+//    }
+
     fun readValues() {
         val readInputRegisters = ModbusConnection.readInputRegisters(unitID.id, U_RMS_REGISTER, 16)
 
@@ -106,6 +132,16 @@ class AVEM4VoltmeterController(private val unitID: UnitID, observer: Observer) :
             .putShort(readInputRegisters[7].toShort())
             .flip() as ByteBuffer).float
 
+        val razmah = (ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN)
+            .putShort(readInputRegisters[8].toShort())
+            .putShort(readInputRegisters[9].toShort())
+            .flip() as ByteBuffer).float
+
+        val coefficentAmp = (ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN)
+            .putShort(readInputRegisters[12].toShort())
+            .putShort(readInputRegisters[13].toShort())
+            .flip() as ByteBuffer).float
+
         val coefficentForm = (ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN)
             .putShort(readInputRegisters[14].toShort())
             .putShort(readInputRegisters[15].toShort())
@@ -115,6 +151,8 @@ class AVEM4VoltmeterController(private val unitID: UnitID, observer: Observer) :
         notice(DeviceParameter(unitID.id, DeviceType.AVEM4Voltmeter, Parameters.VOLTAGE_AVERAGE, voltageAvr))
         notice(DeviceParameter(unitID.id, DeviceType.AVEM4Voltmeter, Parameters.VOLTAGE_RMS, voltageRms))
         notice(DeviceParameter(unitID.id, DeviceType.AVEM4Voltmeter, Parameters.FREQUENCY, frequency))
+        notice(DeviceParameter(unitID.id, DeviceType.AVEM4Voltmeter, Parameters.RAZMAH, razmah))
+        notice(DeviceParameter(unitID.id, DeviceType.AVEM4Voltmeter, Parameters.COEFFICENT_AMP, coefficentAmp))
         notice(DeviceParameter(unitID.id, DeviceType.AVEM4Voltmeter, Parameters.COEFFICENT_FORM, coefficentForm))
     }
 

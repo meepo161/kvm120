@@ -18,9 +18,9 @@ import tornadofx.controlsfx.confirmNotification
 import java.io.File
 
 class ProtocolListWindow : View("Протоколы") {
-    public var tableViewProtocols: TableView<Protocol> by singleAssign()
+    var tableViewProtocols: TableView<Protocol> by singleAssign()
     private lateinit var protocols: ObservableList<Protocol>
-    public var currentItem = ""
+    var currentItem = ""
     override fun onDock() {
         protocols = transaction {
             Protocol.all().toList().observable()
