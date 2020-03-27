@@ -25,13 +25,13 @@ class MainViewController : Controller() {
         Thread {
             while (ModbusConnection.isAppRunning) {
                 Platform.runLater {
-                    view.tfRms.text = String.format("%.4f", CommunicationModel.uRms)
-                    view.tfAvr.text = String.format("%.4f", CommunicationModel.uAvr)
-                    view.tfAmp.text = String.format("%.4f", CommunicationModel.uAmp)
-                    view.tfCoef.text = String.format("%.4f", CommunicationModel.coef)
-                    view.tfFreq.text = String.format("%.4f", CommunicationModel.freq)
-                    view.tfRazmah.text = String.format("%.4f", CommunicationModel.razmah)
-                    view.tfCoefAmp.text = String.format("%.4f", CommunicationModel.coefAmp)
+                    view.tfRms.text = String.format("%.3f", CommunicationModel.uRms)
+                    view.tfAvr.text = String.format("%.3f", CommunicationModel.uAvr)
+                    view.tfAmp.text = String.format("%.3f", CommunicationModel.uAmp)
+                    view.tfCoef.text = String.format("%.3f", CommunicationModel.coef)
+                    view.tfFreq.text = String.format("%.3f", CommunicationModel.freq)
+                    view.tfRazmah.text = String.format("%.3f", CommunicationModel.razmah)
+                    view.tfCoefAmp.text = String.format("%.3f", CommunicationModel.coefAmp)
                 }
                 ModbusUtil.sleep(100)
             }

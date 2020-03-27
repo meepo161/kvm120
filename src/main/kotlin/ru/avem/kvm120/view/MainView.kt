@@ -24,6 +24,13 @@ import kotlin.system.exitProcess
 class MainView : View("КВМ-120") {
     private val controller: MainViewController by inject()
 
+
+    var min1: RadioMenuItem by singleAssign()
+    var min2: RadioMenuItem by singleAssign()
+    var min3: RadioMenuItem by singleAssign()
+    var min4: RadioMenuItem by singleAssign()
+    var min5: RadioMenuItem by singleAssign()
+
     var mainMenubar: MenuBar by singleAssign()
     var tfRms: TextField by singleAssign()
     var tfAvr: TextField by singleAssign()
@@ -56,6 +63,8 @@ class MainView : View("КВМ-120") {
     var isStart = false
     var isPause = false
     var isStop = false
+    val togleGroup = ToggleGroup()
+    var timeOut = 60.0
 
     override fun onBeforeShow() {
         controller.setValues()
@@ -91,11 +100,26 @@ class MainView : View("КВМ-120") {
                             )
                         }
                     }
+                    menu("Время записи") {
+                        min1 = radiomenuitem("1 мин", togleGroup) {
+                            isSelected = true
+                        }
+                        min2 = radiomenuitem("2 мин", togleGroup) {
+                        }
+                        min3 = radiomenuitem("3 мин", togleGroup) {
+                        }
+                        min4 = radiomenuitem("4 мин", togleGroup) {
+                        }
+                        min5 = radiomenuitem("5 мин", togleGroup) {
+                        }
+                    }
                 }
                 menu("Информация") {
                     item("Версия ПО") {
                         action {
-                            controller.showAboutUs()
+//                            controller.showAboutUs()
+                            Toast.makeText("Неверное значение времени усреднения")
+                                .show(Toast.ToastType.ERROR)
                         }
                     }
                 }
@@ -105,78 +129,59 @@ class MainView : View("КВМ-120") {
             tabpane {
                 tab("Значения") {
                     isClosable = false
-
                     anchorpane {
-                        vbox(spacing = 32.0) {
-                            alignmentProperty().set(Pos.CENTER)
+                        vbox(16.0, Pos.CENTER) {
                             anchorpaneConstraints {
                                 leftAnchor = 16.0
                                 rightAnchor = 16.0
                                 topAnchor = 16.0
                                 bottomAnchor = 16.0
                             }
-
-                            hbox(spacing = 32.0) {
-                                vbox(spacing = 32.0) {
-                                    alignmentProperty().set(Pos.CENTER)
-
+                            hbox(32.0, Pos.CENTER) {
+                                vbox(16.0, Pos.CENTER) {
                                     label("Действующее значение, кВ")
                                     tfRms = textfield {
                                         alignmentProperty().set(Pos.CENTER)
                                         prefHeight = 200.0
-                                    }.addClass(Styles.bigger)
+                                    }.addClass(Styles.customfont)
                                 }
-                                vbox(spacing = 32.0) {
-                                    alignmentProperty().set(Pos.CENTER)
-
+                                vbox(16.0, Pos.CENTER) {
                                     label("Среднее значение, кВ")
                                     tfAvr = textfield {
                                         alignmentProperty().set(Pos.CENTER)
                                         prefHeight = 200.0
-
-                                    }.addClass(Styles.bigger)
+                                    }.addClass(Styles.customfont)
                                 }
-                                vbox(spacing = 32.0) {
-                                    alignmentProperty().set(Pos.CENTER)
-
+                                vbox(16.0, Pos.CENTER) {
                                     label("Амлитудное значение, кВ")
                                     tfAmp = textfield {
                                         alignmentProperty().set(Pos.CENTER)
                                         prefHeight = 200.0
 
-                                    }.addClass(Styles.bigger)
+                                    }.addClass(Styles.customfont)
                                 }
                             }
-
-                            hbox(spacing = 32.0) {
-                                alignmentProperty().set(Pos.CENTER)
-
-                                vbox(spacing = 32.0) {
-                                    alignmentProperty().set(Pos.CENTER)
-
+                            hbox(32.0, Pos.CENTER) {
+                                vbox(16.0, Pos.CENTER) {
                                     label("Коэффициент амплитуды")
                                     tfCoefAmp = textfield {
                                         alignmentProperty().set(Pos.CENTER)
                                         prefHeight = 200.0
-
-                                    }.addClass(Styles.bigger)
+                                    }.addClass(Styles.customfont)
                                 }
-                                vbox(spacing = 32.0) {
-                                    alignmentProperty().set(Pos.CENTER)
-
+                                vbox(16.0, Pos.CENTER) {
                                     label("Частота, Гц")
                                     tfFreq = textfield {
                                         alignmentProperty().set(Pos.CENTER)
                                         prefHeight = 200.0
-
-                                    }.addClass(Styles.bigger)
+                                    }.addClass(Styles.customfont)
                                 }
                             }
-                            hbox(spacing = 16.0) {
-                                alignmentProperty().set(Pos.CENTER)
+                            hbox(16.0, Pos.CENTER) {
                                 label("Время усреднения данных, мс:")
                                 tfTimeAveraging = textfield {
-                                }
+                                    prefWidth = 300.0
+                                }.addClass(Styles.customfont, Styles.bigger)
                                 button("Применить") {
                                     action {
                                         CommunicationModel.avem4VoltmeterController.entryConfigurationMod()
@@ -201,20 +206,17 @@ class MainView : View("КВМ-120") {
                         }
                     }
                 }
-
                 tab("График") {
                     isClosable = false
                     anchorpane {
                         vbox(spacing = 8.0) {
-                            alignmentProperty().set(Pos.CENTER)
                             anchorpaneConstraints {
                                 leftAnchor = 16.0
                                 rightAnchor = 16.0
                                 topAnchor = 16.0
                                 bottomAnchor = 16.0
                             }
-                            hbox(spacing = 16.0) {
-                                alignmentProperty().set(Pos.CENTER)
+                            hbox(16.0, Pos.CENTER) {
                                 label("График:")
                                 comboboxNeedValue = combobox {
                                 }
@@ -255,24 +257,33 @@ class MainView : View("КВМ-120") {
                                 }
                                 btnStop = button("Стоп") {
                                     action {
-                                        isStart = false
-                                        isPause = false
-                                        isStop = true
-                                        btnStart.isDisable = false
-                                        btnPause.isDisable = true
-                                        btnStop.isDisable = true
-                                        btnRecord.isDisable = true
-                                        comboboxNeedValue.isDisable = false
+                                        handleStop()
                                     }
                                 }
                             }
-                            hbox(spacing = 16.0) {
-                                alignmentProperty().set(Pos.CENTER)
+                            hbox(16.0, Pos.CENTER) {
                                 tfValueOnGraph = textfield {
                                     alignmentProperty().set(Pos.CENTER)
-                                }
+                                }.addClass(Styles.customfont, Styles.bigger)
                                 btnRecord = button("Начать запись") {
                                     action {
+                                        when {
+                                            min1.isSelected -> {
+                                                timeOut = 60.0
+                                            }
+                                            min2.isSelected -> {
+                                                timeOut = 120.0
+                                            }
+                                            min3.isSelected -> {
+                                                timeOut = 180.0
+                                            }
+                                            min4.isSelected -> {
+                                                timeOut = 240.0
+                                            }
+                                            min5.isSelected -> {
+                                                timeOut = 300.0
+                                            }
+                                        }
                                         isDisable = true
                                         recordGraphInDB()
                                     }
@@ -283,43 +294,36 @@ class MainView : View("КВМ-120") {
                                 data.add(series)
                                 animated = false
                                 createSymbols = false
+                                isLegendVisible = false
                             }.addClass(Styles.lineChart)
                         }
                     }
                 }
                 tab("Дополнительные") {
                     isClosable = false
-
                     anchorpane {
-                        vbox(spacing = 32.0) {
+                        vbox(16.0, Pos.CENTER) {
                             anchorpaneConstraints {
                                 leftAnchor = 16.0
                                 rightAnchor = 16.0
                                 topAnchor = 16.0
                                 bottomAnchor = 16.0
                             }
-
-                            alignmentProperty().set(Pos.CENTER)
-                            hbox(spacing = 32.0) {
-                                alignmentProperty().set(Pos.CENTER)
-                                vbox(spacing = 32.0) {
-                                    alignmentProperty().set(Pos.CENTER)
-
+                            hbox(32.0, Pos.CENTER) {
+                                vbox(16.0, Pos.CENTER) {
                                     label("Размах (двойная амплитуда), кВ")
                                     tfRazmah = textfield {
                                         alignmentProperty().set(Pos.CENTER)
                                         prefHeight = 200.0
-                                    }.addClass(Styles.bigger)
+                                    }.addClass(Styles.customfont)
                                 }
-                                vbox(spacing = 32.0) {
-                                    alignmentProperty().set(Pos.CENTER)
-
+                                vbox(16.0, Pos.CENTER) {
                                     label("Коэффицент формы")
                                     tfCoef = textfield {
                                         alignmentProperty().set(Pos.CENTER)
                                         prefHeight = 200.0
 
-                                    }.addClass(Styles.bigger)
+                                    }.addClass(Styles.customfont)
                                 }
                             }
                         }
@@ -329,12 +333,28 @@ class MainView : View("КВМ-120") {
         }
     }.addClass(Styles.blueTheme, medium)
 
+    private fun handleStop() {
+        isStart = false
+        isPause = false
+        isStop = true
+        btnStart.isDisable = false
+        btnPause.isDisable = true
+        btnStop.isDisable = true
+        btnRecord.isDisable = true
+        comboboxNeedValue.isDisable = false
+    }
+
     private fun recordGraphInDB() {
         listOfValues.clear()
         Thread {
+            var realTime = 0.0
             while (isStart) {
                 listOfValues.add(tfValueOnGraph.text)
                 sleep(100)
+                realTime += 0.1
+                if (realTime > timeOut){
+                    handleStop()
+                }
             }
             saveProtocolToDB(listOfValues)
         }.start()
@@ -361,12 +381,7 @@ class MainView : View("КВМ-120") {
             tfValueOnGraph.text = String.format("%4f", CommunicationModel.coef)
             resetLineChart()
             for (element in list1) {
-                series.data.add(
-                    XYChart.Data<Number, Number>(
-                        realTime++,
-                        element
-                    )
-                )
+                series.data.add(XYChart.Data(realTime++, element))
             }
             find<ProgressWindow>().close()
         }
@@ -374,24 +389,6 @@ class MainView : View("КВМ-120") {
 
     private fun showGraph() {
         Thread {
-            var needValue = ""
-            when {
-                comboboxNeedValue.selectedItem.toString() == rms -> {
-                    needValue = rms
-                }
-                comboboxNeedValue.selectedItem.toString() == avr -> {
-                    needValue = avr
-                }
-                comboboxNeedValue.selectedItem.toString() == amp -> {
-                    needValue = amp
-                }
-                comboboxNeedValue.selectedItem.toString() == coef -> {
-                    needValue = coef
-                }
-                comboboxNeedValue.selectedItem.toString() == freq -> {
-                    needValue = freq
-                }
-            }
             Platform.runLater {
                 if (isStop) {
                     resetLineChart()
@@ -399,21 +396,21 @@ class MainView : View("КВМ-120") {
             }
             while (isStart) {
                 Platform.runLater {
-                    when (needValue) {
+                    when (comboboxNeedValue.selectedItem.toString()) {
                         rms -> {
-                            series.data.add(XYChart.Data<Number, Number>(realTime, CommunicationModel.uRms))
+                            series.data.add(XYChart.Data(realTime, CommunicationModel.uRms))
                             tfValueOnGraph.text = String.format("%.4f", CommunicationModel.uRms)
                         }
                         avr -> {
-                            series.data.add(XYChart.Data<Number, Number>(realTime, CommunicationModel.uAvr))
+                            series.data.add(XYChart.Data(realTime, CommunicationModel.uAvr))
                             tfValueOnGraph.text = String.format("%.4f", CommunicationModel.uAvr)
                         }
                         amp -> {
-                            series.data.add(XYChart.Data<Number, Number>(realTime, CommunicationModel.uAmp))
+                            series.data.add(XYChart.Data(realTime, CommunicationModel.uAmp))
                             tfValueOnGraph.text = String.format("%.4f", CommunicationModel.uAmp)
                         }
                         freq -> {
-                            series.data.add(XYChart.Data<Number, Number>(realTime, CommunicationModel.freq))
+                            series.data.add(XYChart.Data(realTime, CommunicationModel.freq))
                             tfValueOnGraph.text = String.format("%.4f", CommunicationModel.freq)
                         }
                     }

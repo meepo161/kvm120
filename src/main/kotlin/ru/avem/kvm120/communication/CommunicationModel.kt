@@ -53,7 +53,7 @@ object CommunicationModel : Observer {
                 }
                 sleep(1)
             }
-        }.start()
+        }/*.start()*/
     }
 
     override fun update(o: Observable?, arg: Any?) {

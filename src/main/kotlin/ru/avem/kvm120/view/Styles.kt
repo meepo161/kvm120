@@ -8,6 +8,7 @@ class Styles : Stylesheet() {
     companion object {
         val lineChart by cssclass()
         val blueTheme by cssclass()
+        val customfont by cssclass()
         val medium by cssclass()
         val hard by cssclass()
         val extraHard by cssclass()
@@ -23,11 +24,16 @@ class Styles : Stylesheet() {
         val vboxTextArea by cssclass()
     }
 
+
     init {
 
         blueTheme {
-            baseColor = c("#0f4c81")
-            fontFamily = "Comic Sans MS"
+            baseColor = c("#115a98")
+        }
+
+        customfont {
+            font = loadFont("/font/LCDNova.ttf", 60.0)!!
+//            textFill = c("#ff0f0f")
         }
 
         medium {
