@@ -32,6 +32,9 @@ class MainViewController : Controller() {
                     view.tfFreq.text = String.format("%.3f", CommunicationModel.freq)
                     view.tfRazmah.text = String.format("%.3f", CommunicationModel.razmah)
                     view.tfCoefAmp.text = String.format("%.3f", CommunicationModel.coefAmp)
+//                    if (ModbusConnection.isModbusConnected) {
+//                        view.root.isDisable = false
+//                    }
                 }
                 ModbusUtil.sleep(100)
             }

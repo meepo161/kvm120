@@ -58,8 +58,7 @@ class GraphHistoryWindow : View("История графика") {
                     val numberAxis = NumberAxis()
                     numberAxis.isForceZeroInRange = false
                     lineChart = linechart("", numberAxis, NumberAxis()) {
-                        prefHeight = 600.0
-                        prefWidth = 860.0
+                        prefWidth = 1200.0
                         animated = false
                         createSymbols = false
                         isLegendVisible = false
@@ -103,17 +102,18 @@ class GraphHistoryWindow : View("История графика") {
                     }
                 }
             }
-            tableViewDots = tableview(valuesForColumn) {
-                columnResizePolicyProperty().set(TableView.CONSTRAINED_RESIZE_POLICY)
-                prefHeight = 720.0
-                column("Значение", Double::class) {
-                    value {
-                        valuesForColumn
-                    }
-                }
-                column("Время", Double::class) {
-                }
-            }
+//            tableViewDots = tableview(valuesForColumn) {
+//                columnResizePolicyProperty().set(TableView.CONSTRAINED_RESIZE_POLICY)
+//                prefHeight = 720.0
+//                column("Значение", Double::class) {
+//                    value {
+//                        valuesForColumn
+//                    }
+//                }
+//                column("Время", Double::class) {
+//
+//                }
+//            }
         }
     }.addClass(Styles.blueTheme, Styles.extraHard)
 }

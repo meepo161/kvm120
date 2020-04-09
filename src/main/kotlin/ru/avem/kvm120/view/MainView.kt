@@ -32,6 +32,7 @@ class MainView : View("КВМ-120") {
     var min5: RadioMenuItem by singleAssign()
 
     var mainMenubar: MenuBar by singleAssign()
+    var mainTabPane: TabPane by singleAssign()
     var tfRms: TextField by singleAssign()
     var tfAvr: TextField by singleAssign()
     var tfAmp: TextField by singleAssign()
@@ -76,7 +77,12 @@ class MainView : View("КВМ-120") {
         btnPause.isDisable = true
         btnStop.isDisable = true
         btnRecord.isDisable = true
-        tfTimeAveraging.text = String.format("%.1f", CommunicationModel.avem4VoltmeterController.readTimeAveraging())
+//        try {
+//            tfTimeAveraging.text =
+//                String.format("%.1f", CommunicationModel.avem4VoltmeterController.readTimeAveraging())
+//        } catch (e: Exception) {
+//            root.isDisable = true
+//        }
     }
 
     override val root = borderpane {
@@ -126,7 +132,7 @@ class MainView : View("КВМ-120") {
             }.addClass(Styles.megaHard)
         }
         center {
-            tabpane {
+            mainTabPane = tabpane {
                 tab("Значения") {
                     isClosable = false
                     anchorpane {
@@ -352,7 +358,7 @@ class MainView : View("КВМ-120") {
                 listOfValues.add(tfValueOnGraph.text)
                 sleep(100)
                 realTime += 0.1
-                if (realTime > timeOut){
+                if (realTime > timeOut) {
                     handleStop()
                 }
             }
