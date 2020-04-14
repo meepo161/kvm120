@@ -10,6 +10,7 @@ import com.ucicke.k2mod.modbus.util.SerialParameters
 import org.slf4j.LoggerFactory
 import ru.avem.kvm120.communication.devices.enums.COMState
 import java.lang.Thread.sleep
+import kotlin.concurrent.thread
 
 object ModbusConnection {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -32,7 +33,7 @@ object ModbusConnection {
     var indicateCOM: ((COMState) -> Unit) = { COMState.CLOSE }
 
     init {
-        Thread {
+        thread {
             while (isAppRunning) {
                 if (!isSerialConnecting()) {
                     isModbusConnected = try {
@@ -52,14 +53,14 @@ object ModbusConnection {
                 indicateCOM(if (isSerialConnecting()) COMState.OPEN else COMState.CLOSE)
                 sleep(100)
             }
-        }.start()
+        }
     }
 
     private fun isSerialConnecting(): Boolean {
         return isModbusConnected && master != null && master!!.connection != null && master!!.connection.isOpen && master!!.connection.bytesAvailable() >= 0
     }
 
-    fun initModbusConnection(): Boolean {
+    private fun initModbusConnection(): Boolean {
         val serialParams = SerialParameters()
 
         val cp2103 = try {
@@ -93,7 +94,7 @@ object ModbusConnection {
         return master?.connection?.isOpen ?: false
     }
 
-    fun detectInterfaceConverter(): SerialPort? {
+    private fun detectInterfaceConverter(): SerialPort? {
         val filter = SerialPort.getCommPorts() // TODO Сделать нормально
         return filter.first()
 

@@ -1,8 +1,9 @@
 package ru.avem.kvm120.view
 
-import javafx.geometry.Pos
-import javafx.stage.StageStyle
-import tornadofx.*
+import tornadofx.View
+import tornadofx.addClass
+import tornadofx.anchorpane
+import tornadofx.progressindicator
 
 
 class ProgressWindow : View("Состояние защит") {

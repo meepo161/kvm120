@@ -1,34 +1,13 @@
 package ru.avem.kvm120.utils
 
+import javafx.event.EventHandler
+import javafx.scene.control.TextField
 import java.awt.Desktop
-import java.io.*
-import java.nio.ByteBuffer
-import java.util.*
-import kotlin.math.abs
-
-fun formatRealNumber(num: Double): Double {
-    val absNum = abs(num)
-
-    var format = "%.0f"
-    when {
-        absNum == 0.0 -> format = "%.0f"
-        absNum < 0.1f -> format = "%.5f"
-        absNum < 1f -> format = "%.4f"
-        absNum < 10f -> format = "%.3f"
-        absNum < 100f -> format = "%.2f"
-        absNum < 1000f -> format = "%.1f"
-        absNum < 10000f -> format = "%.0f"
-    }
-    return String.format(Locale.US, format, num).toDouble()
-}
-
-fun openFile(file: File) {
-    try {
-        Desktop.getDesktop().open(file)
-    } catch (e: IOException) {
-        e.printStackTrace()
-    }
-}
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.nio.file.Paths
 
 fun copyFileFromStream(_inputStream: InputStream, dest: File) {
     _inputStream.use { inputStream ->
@@ -42,5 +21,13 @@ fun copyFileFromStream(_inputStream: InputStream, dest: File) {
             }
         } catch (e: FileNotFoundException) {
         }
+    }
+}
+
+fun TextField.callKeyBoard() {
+    onTouchPressed = EventHandler {
+        Desktop.getDesktop()
+            .open(Paths.get("C:/Program Files/Common Files/Microsoft Shared/ink/TabTip.exe").toFile())
+        requestFocus()
     }
 }

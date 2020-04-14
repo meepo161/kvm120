@@ -7,9 +7,9 @@ import ru.avem.kvm120.communication.devices.avem4.AVEM4VoltmeterController
 import ru.avem.kvm120.communication.devices.enums.DeviceType
 import ru.avem.kvm120.communication.devices.enums.UnitID
 import ru.avem.kvm120.communication.devices.parameters.DeviceParameter
-import tornadofx.observableList
 import java.lang.Thread.sleep
 import java.util.*
+import kotlin.concurrent.thread
 
 object CommunicationModel : Observer {
     val avem4VoltmeterController = AVEM4VoltmeterController(UnitID.AVEM4, this)
@@ -26,11 +26,10 @@ object CommunicationModel : Observer {
     var coef = 0.0
     var razmah = 0.0
     var coefAmp = 0.0
-    var timeAveraging = 0.0
-    var listDots = observableList<Float>()
+    private var timeAveraging = 0.0
 
     init {
-        Thread {
+        thread {
             while (isAppRunning) {
                 deviceControllers.forEach {
                     if (isModbusConnected) {
@@ -53,7 +52,7 @@ object CommunicationModel : Observer {
                 }
                 sleep(1)
             }
-        }/*.start()*/
+        }
     }
 
     override fun update(o: Observable?, arg: Any?) {

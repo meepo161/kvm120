@@ -3,7 +3,6 @@ package ru.avem.kvm120.app
 import javafx.scene.image.Image
 import javafx.scene.input.KeyCombination
 import javafx.stage.Stage
-import javafx.stage.StageStyle
 import ru.avem.kvm120.communication.CommunicationModel
 import ru.avem.kvm120.communication.ModbusConnection
 import ru.avem.kvm120.database.validateDB
@@ -23,8 +22,8 @@ class Kvm120 : App(MainView::class, Styles::class) {
         super.start(stage)
         FX.primaryStage.icons += Image("icon.png")
 //        stage.initStyle(StageStyle.TRANSPARENT)
-//        stage.isFullScreen = true
-//        stage.isResizable = false
+        stage.isFullScreen = true
+        stage.isResizable = false
     }
 
     private fun initializeSingletons() {

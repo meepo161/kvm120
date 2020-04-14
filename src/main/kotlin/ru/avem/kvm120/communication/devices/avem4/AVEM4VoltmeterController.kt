@@ -38,7 +38,7 @@ class AVEM4VoltmeterController(private val unitID: UnitID, observer: Observer) :
     override var isResponding = false
         set(value) {
             field = value
-            notice(DeviceParameter(unitID.id, DEVICE_ID, Parameters.IS_RESPONDING, field.toInt()))
+            notice(DeviceParameter(DEVICE_ID, Parameters.IS_RESPONDING, field.toInt()))
         }
 
     init {
@@ -147,13 +147,13 @@ class AVEM4VoltmeterController(private val unitID: UnitID, observer: Observer) :
             .putShort(readInputRegisters[15].toShort())
             .flip() as ByteBuffer).float
 
-        notice(DeviceParameter(unitID.id, DeviceType.AVEM4Voltmeter, Parameters.VOLTAGE_AMP, voltageAmp))
-        notice(DeviceParameter(unitID.id, DeviceType.AVEM4Voltmeter, Parameters.VOLTAGE_AVERAGE, voltageAvr))
-        notice(DeviceParameter(unitID.id, DeviceType.AVEM4Voltmeter, Parameters.VOLTAGE_RMS, voltageRms))
-        notice(DeviceParameter(unitID.id, DeviceType.AVEM4Voltmeter, Parameters.FREQUENCY, frequency))
-        notice(DeviceParameter(unitID.id, DeviceType.AVEM4Voltmeter, Parameters.RAZMAH, razmah))
-        notice(DeviceParameter(unitID.id, DeviceType.AVEM4Voltmeter, Parameters.COEFFICENT_AMP, coefficentAmp))
-        notice(DeviceParameter(unitID.id, DeviceType.AVEM4Voltmeter, Parameters.COEFFICENT_FORM, coefficentForm))
+        notice(DeviceParameter(DeviceType.AVEM4Voltmeter, Parameters.VOLTAGE_AMP, voltageAmp))
+        notice(DeviceParameter(DeviceType.AVEM4Voltmeter, Parameters.VOLTAGE_AVERAGE, voltageAvr))
+        notice(DeviceParameter(DeviceType.AVEM4Voltmeter, Parameters.VOLTAGE_RMS, voltageRms))
+        notice(DeviceParameter(DeviceType.AVEM4Voltmeter, Parameters.FREQUENCY, frequency))
+        notice(DeviceParameter(DeviceType.AVEM4Voltmeter, Parameters.RAZMAH, razmah))
+        notice(DeviceParameter(DeviceType.AVEM4Voltmeter, Parameters.COEFFICENT_AMP, coefficentAmp))
+        notice(DeviceParameter(DeviceType.AVEM4Voltmeter, Parameters.COEFFICENT_FORM, coefficentForm))
     }
 
     fun entryConfigurationMod() {

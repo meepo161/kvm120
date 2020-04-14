@@ -12,27 +12,28 @@ import javafx.stage.Modality
 import javafx.stage.StageStyle
 import org.jetbrains.exposed.sql.transactions.transaction
 import ru.avem.kvm120.communication.CommunicationModel
+import ru.avem.kvm120.communication.ModbusConnection
 import ru.avem.kvm120.controllers.MainViewController
 import ru.avem.kvm120.database.entities.Protocol
 import ru.avem.kvm120.utils.Toast
+import ru.avem.kvm120.utils.callKeyBoard
 import ru.avem.kvm120.view.Styles.Companion.medium
 import tornadofx.*
 import java.text.SimpleDateFormat
+import kotlin.concurrent.thread
 import kotlin.system.exitProcess
 
 
 class MainView : View("КВМ-120") {
     private val controller: MainViewController by inject()
-
-
-    var min1: RadioMenuItem by singleAssign()
-    var min2: RadioMenuItem by singleAssign()
-    var min3: RadioMenuItem by singleAssign()
-    var min4: RadioMenuItem by singleAssign()
-    var min5: RadioMenuItem by singleAssign()
-
-    var mainMenubar: MenuBar by singleAssign()
-    var mainTabPane: TabPane by singleAssign()
+    private var min1: RadioMenuItem by singleAssign()
+    private var min2: RadioMenuItem by singleAssign()
+    private var min3: RadioMenuItem by singleAssign()
+    private var min4: RadioMenuItem by singleAssign()
+    private var min5: RadioMenuItem by singleAssign()
+    private var mainMenubar: MenuBar by singleAssign()
+    private var menuBd: Menu by singleAssign()
+    private var mainTabPane: TabPane by singleAssign()
     var tfRms: TextField by singleAssign()
     var tfAvr: TextField by singleAssign()
     var tfAmp: TextField by singleAssign()
@@ -40,35 +41,40 @@ class MainView : View("КВМ-120") {
     var tfFreq: TextField by singleAssign()
     var tfRazmah: TextField by singleAssign()
     var tfCoefAmp: TextField by singleAssign()
-
-    var comboboxNeedValue: ComboBox<String> by singleAssign()
-    var rms = "Действующее"
-    var avr = "Среднее"
-    var amp = "Амплитудное"
-    var coef = "Форма"
-    var freq = "Частота"
-    private val values: ObservableList<String> =
-        observableList(rms, avr, amp, coef, freq)
-
+    private var comboboxNeedValue: ComboBox<String> by singleAssign()
+    private var rms = "Действующее"
+    private var avr = "Среднее"
+    private var amp = "Амплитудное"
+    private var form = "Форма"
+    private var freq = "Частота"
+    private val values: ObservableList<String> = observableList(rms, avr, amp, form, freq)
     var listOfValues = mutableListOf<String>()
-
+    var btnTimeAveraging: Button by singleAssign()
     var btnStart: Button by singleAssign()
-    var btnPause: Button by singleAssign()
-    var btnStop: Button by singleAssign()
-    var btnRecord: Button by singleAssign()
-    var tfValueOnGraph: TextField by singleAssign()
-    var tfTimeAveraging: TextField by singleAssign()
-    var lineChart: LineChart<Number, Number> by singleAssign()
-    var series = XYChart.Series<Number, Number>()
-    var realTime = 0.0
-    var isStart = false
-    var isPause = false
-    var isStop = false
-    val togleGroup = ToggleGroup()
-    var timeOut = 60.0
+    private var btnPause: Button by singleAssign()
+    private var btnStop: Button by singleAssign()
+    private var btnRecord: Button by singleAssign()
+    private var tfValueOnGraph: TextField by singleAssign()
+    private var tfTimeAveraging: TextField by singleAssign()
+    private var lineChart: LineChart<Number, Number> by singleAssign()
+    private var series = XYChart.Series<Number, Number>()
+    private var realTime = 0.0
+    private var isStart = false
+    private var isPause = false
+    private var isStop = false
+    private val togleGroup = ToggleGroup()
+    private var timeOut = 60.0
 
     override fun onBeforeShow() {
         controller.setValues()
+        if (!ModbusConnection.isModbusConnected) {
+            Platform.runLater {
+                Toast.makeText("Подключите преобразователь").show(Toast.ToastType.ERROR)
+            }
+        } else {
+            tfTimeAveraging.text =
+                String.format("%.1f", CommunicationModel.avem4VoltmeterController.readTimeAveraging())
+        }
     }
 
     override fun onDock() {
@@ -77,12 +83,6 @@ class MainView : View("КВМ-120") {
         btnPause.isDisable = true
         btnStop.isDisable = true
         btnRecord.isDisable = true
-//        try {
-//            tfTimeAveraging.text =
-//                String.format("%.1f", CommunicationModel.avem4VoltmeterController.readTimeAveraging())
-//        } catch (e: Exception) {
-//            root.isDisable = true
-//        }
     }
 
     override val root = borderpane {
@@ -97,7 +97,7 @@ class MainView : View("КВМ-120") {
                         }
                     }
                 }
-                menu("База данных") {
+                menuBd = menu("База данных") {
                     item("Протоколы") {
                         action {
                             find<ProtocolListWindow>().openModal(
@@ -186,9 +186,10 @@ class MainView : View("КВМ-120") {
                             hbox(16.0, Pos.CENTER) {
                                 label("Время усреднения данных, мс:")
                                 tfTimeAveraging = textfield {
+                                    callKeyBoard()
                                     prefWidth = 300.0
                                 }.addClass(Styles.customfont, Styles.bigger)
-                                button("Применить") {
+                                btnTimeAveraging = button("Применить") {
                                     action {
                                         CommunicationModel.avem4VoltmeterController.entryConfigurationMod()
                                         var timeAveraging = 1.0f
@@ -231,15 +232,15 @@ class MainView : View("КВМ-120") {
                                         if (!isPause) {
                                             resetLineChart()
                                         }
-                                        if (comboboxNeedValue.selectionModel.selectedItem == coef) {
+                                        if (comboboxNeedValue.selectionModel.selectedItem == form) {
                                             showProgressIndicator()
-                                            Thread {
+                                            thread {
                                                 isDisable = true
                                                 val listOfDots = CommunicationModel.avem4VoltmeterController.readDotsF()
                                                 drawGraphFormVoltage(listOfDots)
                                                 recordFormGraphInDB(listOfDots)
                                                 isDisable = false
-                                            }.start()
+                                            }
                                         } else {
                                             isDisable = true
                                             showGraph()
@@ -296,6 +297,7 @@ class MainView : View("КВМ-120") {
                                 }
                             }
                             lineChart = linechart("", NumberAxis(), NumberAxis()) {
+                                xAxis.label = "Время, с"
                                 prefHeight = 600.0
                                 data.add(series)
                                 animated = false
@@ -352,7 +354,7 @@ class MainView : View("КВМ-120") {
 
     private fun recordGraphInDB() {
         listOfValues.clear()
-        Thread {
+        thread {
             var realTime = 0.0
             while (isStart) {
                 listOfValues.add(tfValueOnGraph.text)
@@ -363,7 +365,7 @@ class MainView : View("КВМ-120") {
                 }
             }
             saveProtocolToDB(listOfValues)
-        }.start()
+        }
     }
 
     private fun recordFormGraphInDB(list: List<Float>) {
@@ -394,8 +396,9 @@ class MainView : View("КВМ-120") {
     }
 
     private fun showGraph() {
-        Thread {
+        thread {
             Platform.runLater {
+                setLabelYAxis()
                 if (isStop) {
                     resetLineChart()
                 }
@@ -424,7 +427,23 @@ class MainView : View("КВМ-120") {
                 sleep(100)
                 realTime += 0.1
             }
-        }.start()
+        }
+    }
+
+    private fun setLabelYAxis() {
+        lineChart.xAxis.label = "Время, с"
+        when {
+            comboboxNeedValue.selectedItem.toString() == form -> {
+                lineChart.yAxis.label = "Напряжение, кВ"
+                lineChart.xAxis.label = "Время"
+            }
+            comboboxNeedValue.selectedItem.toString() != freq -> {
+                lineChart.yAxis.label = "Напряжение, кВ"
+            }
+            comboboxNeedValue.selectedItem.toString() == freq -> {
+                lineChart.yAxis.label = "Частота, Гц"
+            }
+        }
     }
 
     private fun resetLineChart() {

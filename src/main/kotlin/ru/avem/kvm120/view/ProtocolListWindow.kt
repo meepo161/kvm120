@@ -4,23 +4,18 @@ import javafx.collections.ObservableList
 import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.control.TableView
-import javafx.stage.FileChooser
 import javafx.stage.Modality
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.transactions.transaction
 import ru.avem.kvm120.database.entities.Protocol
 import ru.avem.kvm120.database.entities.ProtocolsTable
-import ru.avem.kvm120.protocol.saveProtocolAsWorkbook
 import ru.avem.kvm120.utils.Singleton
-import ru.avem.kvm120.utils.openFile
+import ru.avem.kvm120.utils.callKeyBoard
 import tornadofx.*
-import tornadofx.controlsfx.confirmNotification
-import java.io.File
 
 class ProtocolListWindow : View("Протоколы") {
-    var tableViewProtocols: TableView<Protocol> by singleAssign()
+    private var tableViewProtocols: TableView<Protocol> by singleAssign()
     private lateinit var protocols: ObservableList<Protocol>
-    var currentItem = ""
     override fun onDock() {
         protocols = transaction {
             Protocol.all().toList().observable()
@@ -44,6 +39,7 @@ class ProtocolListWindow : View("Протоколы") {
             alignmentProperty().set(Pos.CENTER)
 
             textfield {
+                callKeyBoard()
                 prefWidth = 600.0
 
                 promptText = "Фильтр"
@@ -84,62 +80,9 @@ class ProtocolListWindow : View("Протоколы") {
                                 modality = Modality.APPLICATION_MODAL, escapeClosesWindow = true,
                                 resizable = false, owner = this@ProtocolListWindow.currentWindow
                             )
-//
-//                            close()
-//                            saveProtocolAsWorkbook()
-//                            openFile(File("protocol.xlsx"))
-//                        }
                         }
                     }
                 }
-//                button("Сохранить как") {
-//                    action {
-//                        if (tableViewProtocols.selectedItem != null) {
-//                            val files = chooseFile(
-//                                "Выберите директорию для сохранения",
-//                                arrayOf(FileChooser.ExtensionFilter("XSLX Files (*.xlsx)", "*.xlsx")),
-//                                FileChooserMode.Save,
-//                                this@ProtocolListWindow.currentWindow
-//                            ) {
-//                                this.initialDirectory = File(System.getProperty("user.home"))
-//                            }
-//
-//                            if (files.isNotEmpty()) {
-//                                saveProtocolAsWorkbook(files.first().absolutePath)
-//                                confirmNotification(
-//                                    "Готово",
-//                                    "Успешно сохранено",
-//                                    Pos.BOTTOM_CENTER,
-//                                    owner = this@ProtocolListWindow.currentWindow
-//                                )
-//                            }
-//                        }
-//                    }
-//                }
-//                button("Сохранить все") {
-//                    action {
-//                        if (tableViewProtocols.items.size > 0) {
-//                            val dir = chooseDirectory(
-//                                "Выберите директорию для сохранения",
-//                                File(System.getProperty("user.home")),
-//                                this@ProtocolListWindow.currentWindow
-//                            )
-//
-//                            if (dir != null) {
-//                                tableViewProtocols.items.forEach {
-//                                    val file = File(dir, "${it.id.value}.xlsx")
-//                                    saveProtocolAsWorkbook(file.absolutePath)
-//                                }
-//                                confirmNotification(
-//                                    "Готово",
-//                                    "Успешно сохранено",
-//                                    Pos.BOTTOM_CENTER,
-//                                    owner = this@ProtocolListWindow.currentWindow
-//                                )
-//                            }
-//                        }
-//                    }
-//                }
                 button("Удалить") {
                     action {
                         if (tableViewProtocols.selectedItem != null) {
