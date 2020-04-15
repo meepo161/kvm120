@@ -3,11 +3,14 @@ package ru.avem.kvm120.view
 import com.ucicke.k2mod.modbus.util.ModbusUtil.sleep
 import javafx.application.Platform
 import javafx.collections.ObservableList
+import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.chart.LineChart
 import javafx.scene.chart.NumberAxis
 import javafx.scene.chart.XYChart
 import javafx.scene.control.*
+import javafx.scene.layout.Priority
+import javafx.scene.shape.Circle
 import javafx.stage.Modality
 import javafx.stage.StageStyle
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -18,6 +21,7 @@ import ru.avem.kvm120.database.entities.Protocol
 import ru.avem.kvm120.utils.Toast
 import ru.avem.kvm120.utils.callKeyBoard
 import ru.avem.kvm120.view.Styles.Companion.medium
+import ru.avem.kvm120.view.Styles.Companion.megaHard
 import tornadofx.*
 import java.text.SimpleDateFormat
 import kotlin.concurrent.thread
@@ -31,16 +35,32 @@ class MainView : View("КВМ-120") {
     private var min3: RadioMenuItem by singleAssign()
     private var min4: RadioMenuItem by singleAssign()
     private var min5: RadioMenuItem by singleAssign()
+    private var cmiRms: CheckMenuItem by singleAssign()
+    private var cmiAvr: CheckMenuItem by singleAssign()
+    private var cmiAmp: CheckMenuItem by singleAssign()
+    private var cmiCoef: CheckMenuItem by singleAssign()
+    private var cmiCoefAmp: CheckMenuItem by singleAssign()
+    private var cmiFreq: CheckMenuItem by singleAssign()
     private var mainMenubar: MenuBar by singleAssign()
     private var menuBd: Menu by singleAssign()
     private var mainTabPane: TabPane by singleAssign()
     var tfRms: TextField by singleAssign()
     var tfAvr: TextField by singleAssign()
     var tfAmp: TextField by singleAssign()
-    var tfCoef: TextField by singleAssign()
-    var tfFreq: TextField by singleAssign()
-    var tfRazmah: TextField by singleAssign()
     var tfCoefAmp: TextField by singleAssign()
+    var tfFreq: TextField by singleAssign()
+    var tfRmsDop: TextField by singleAssign()
+    var tfAvrDop: TextField by singleAssign()
+    var tfAmpDop: TextField by singleAssign()
+    var tfCoefAmpDop: TextField by singleAssign()
+    var tfFreqDop: TextField by singleAssign()
+    var tfCoefDop: TextField by singleAssign()
+    var labelRmsDop: Label by singleAssign()
+    var labelAvrDop: Label by singleAssign()
+    var labelAmpDop: Label by singleAssign()
+    var labelCoefAmpDop: Label by singleAssign()
+    var labelFreqDop: Label by singleAssign()
+    var labelCoefDop: Label by singleAssign()
     private var comboboxNeedValue: ComboBox<String> by singleAssign()
     private var rms = "Действующее"
     private var avr = "Среднее"
@@ -48,33 +68,41 @@ class MainView : View("КВМ-120") {
     private var form = "Форма"
     private var freq = "Частота"
     private val values: ObservableList<String> = observableList(rms, avr, amp, form, freq)
-    var listOfValues = mutableListOf<String>()
-    var btnTimeAveraging: Button by singleAssign()
-    var btnStart: Button by singleAssign()
+    private var listOfValues = mutableListOf<String>()
+    private var btnTimeAveraging: Button by singleAssign()
+    private var btnStart: Button by singleAssign()
     private var btnPause: Button by singleAssign()
     private var btnStop: Button by singleAssign()
     private var btnRecord: Button by singleAssign()
+    private var btnStopRecord: Button by singleAssign()
     private var tfValueOnGraph: TextField by singleAssign()
     private var tfTimeAveraging: TextField by singleAssign()
     private var lineChart: LineChart<Number, Number> by singleAssign()
     private var series = XYChart.Series<Number, Number>()
     private var realTime = 0.0
     private var isStart = false
+    private var isStartRecord = false
     private var isPause = false
     private var isStop = false
     private val togleGroup = ToggleGroup()
     private var timeOut = 60.0
+    var comIndicate: Circle by singleAssign()
+    var comIndicateDevice: Circle by singleAssign()
 
     override fun onBeforeShow() {
-        controller.setValues()
         if (!ModbusConnection.isModbusConnected) {
             Platform.runLater {
                 Toast.makeText("Подключите преобразователь").show(Toast.ToastType.ERROR)
             }
         } else {
-            tfTimeAveraging.text =
-                String.format("%.1f", CommunicationModel.avem4VoltmeterController.readTimeAveraging())
+            try {
+                tfTimeAveraging.text =
+                    String.format("%.1f", CommunicationModel.avem4VoltmeterController.readTimeAveraging())
+            } catch (e: Exception) {
+                println("sout")
+            }
         }
+        controller.setValues()
     }
 
     override fun onDock() {
@@ -83,6 +111,7 @@ class MainView : View("КВМ-120") {
         btnPause.isDisable = true
         btnStop.isDisable = true
         btnRecord.isDisable = true
+        btnStopRecord.isDisable = true
     }
 
     override val root = borderpane {
@@ -121,15 +150,91 @@ class MainView : View("КВМ-120") {
                     }
                 }
                 menu("Информация") {
+                    menu("Отображение") {
+                        cmiRms = checkmenuitem("Действуйщее напряжение") {
+                            isSelected = true
+                            onAction = EventHandler {
+                                if (cmiRms.isSelected) {
+                                    tfRmsDop.show()
+                                    labelRmsDop.show()
+                                } else {
+                                    tfRmsDop.hide()
+                                    labelRmsDop.hide()
+                                }
+                            }
+                        }
+                        cmiAvr = checkmenuitem("Среднее напряжение") {
+                            isSelected = true
+                            onAction = EventHandler {
+                                if (cmiAvr.isSelected) {
+                                    tfAvrDop.show()
+                                    labelAvrDop.show()
+                                } else {
+                                    tfAvrDop.hide()
+                                    labelAvrDop.hide()
+                                }
+                            }
+                        }
+                        cmiAmp = checkmenuitem("Амплитудное напряжение") {
+                            isSelected = true
+                            onAction = EventHandler {
+                                if (cmiAmp.isSelected) {
+                                    tfAmpDop.show()
+                                    labelAmpDop.show()
+                                } else {
+                                    tfAmpDop.hide()
+                                    labelAmpDop.hide()
+                                }
+                            }
+                        }
+                        cmiCoef = checkmenuitem("Коэффицент формы") {
+                            isSelected = true
+                            onAction = EventHandler {
+                                if (cmiCoef.isSelected) {
+                                    tfCoefDop.show()
+                                    labelCoefDop.show()
+                                } else {
+                                    tfCoefDop.hide()
+                                    labelCoefDop.hide()
+                                }
+                            }
+                        }
+                        cmiCoefAmp = checkmenuitem("Коэффицент амплитуды") {
+                            isSelected = true
+                            onAction = EventHandler {
+                                if (cmiCoefAmp.isSelected) {
+                                    tfCoefAmpDop.show()
+                                    labelCoefAmpDop.show()
+                                } else {
+                                    tfCoefAmpDop.hide()
+                                    labelCoefAmpDop.hide()
+                                }
+                            }
+                        }
+                        cmiFreq = checkmenuitem("Частота") {
+                            isSelected = true
+                            onAction = EventHandler {
+                                if (cmiFreq.isSelected) {
+                                    tfFreqDop.show()
+                                    labelFreqDop.show()
+                                } else {
+                                    tfFreqDop.hide()
+                                    labelFreqDop.hide()
+                                }
+                            }
+                        }
+                    }
                     item("Версия ПО") {
                         action {
-//                            controller.showAboutUs()
-                            Toast.makeText("Неверное значение времени усреднения")
-                                .show(Toast.ToastType.ERROR)
+                            Toast.makeText(
+                                "Версия ПО: 1.0.3\n" +
+                                        "Дата: 15.04.2020"
+                            )
+                                .show(Toast.ToastType.INFORMATION)
                         }
                     }
                 }
-            }.addClass(Styles.megaHard)
+            }.addClass(megaHard)
         }
         center {
             mainTabPane = tabpane {
@@ -231,6 +336,7 @@ class MainView : View("КВМ-120") {
                                     action {
                                         if (!isPause) {
                                             resetLineChart()
+                                            btnRecord.isDisable = false
                                         }
                                         if (comboboxNeedValue.selectionModel.selectedItem == form) {
                                             showProgressIndicator()
@@ -242,12 +348,12 @@ class MainView : View("КВМ-120") {
                                                 isDisable = false
                                             }
                                         } else {
-                                            isDisable = true
                                             showGraph()
                                             isStart = true
+                                            isPause = false
+                                            btnStart.isDisable = true
                                             btnPause.isDisable = false
                                             btnStop.isDisable = false
-                                            btnRecord.isDisable = false
                                             comboboxNeedValue.isDisable = true
                                         }
                                     }
@@ -292,7 +398,17 @@ class MainView : View("КВМ-120") {
                                             }
                                         }
                                         isDisable = true
+                                        isStartRecord = true
+                                        btnRecord.isDisable = true
+                                        btnStopRecord.isDisable = false
                                         recordGraphInDB()
+                                    }
+                                }
+                                btnStopRecord = button("Стоп запись") {
+                                    action {
+                                        isStartRecord = false
+                                        btnRecord.isDisable = false
+                                        btnStopRecord.isDisable = true
                                     }
                                 }
                             }
@@ -310,34 +426,82 @@ class MainView : View("КВМ-120") {
                 tab("Дополнительные") {
                     isClosable = false
                     anchorpane {
-                        vbox(16.0, Pos.CENTER) {
+                        vbox(4.0, Pos.CENTER) {
                             anchorpaneConstraints {
                                 leftAnchor = 16.0
                                 rightAnchor = 16.0
                                 topAnchor = 16.0
                                 bottomAnchor = 16.0
                             }
-                            hbox(32.0, Pos.CENTER) {
-                                vbox(16.0, Pos.CENTER) {
-                                    label("Размах (двойная амплитуда), кВ")
-                                    tfRazmah = textfield {
+                            hbox(16.0, Pos.CENTER) {
+                                vbox(8.0, Pos.CENTER) {
+                                    labelRmsDop = label("Действующее значение, кВ")
+                                    tfRmsDop = textfield {
                                         alignmentProperty().set(Pos.CENTER)
-                                        prefHeight = 200.0
+                                    }.addClass(Styles.customfont)
+
+                                    labelAvrDop = label("Среднее значение, кВ")
+                                    tfAvrDop = textfield {
+                                        alignmentProperty().set(Pos.CENTER)
+                                    }.addClass(Styles.customfont)
+
+                                    labelAmpDop = label("Амлитудное значение, кВ")
+                                    tfAmpDop = textfield {
+                                        alignmentProperty().set(Pos.CENTER)
                                     }.addClass(Styles.customfont)
                                 }
-                                vbox(16.0, Pos.CENTER) {
-                                    label("Коэффицент формы")
-                                    tfCoef = textfield {
+                                vbox(8.0, Pos.CENTER) {
+                                    labelCoefDop = label("Коэффицент формы")
+                                    tfCoefDop = textfield {
                                         alignmentProperty().set(Pos.CENTER)
-                                        prefHeight = 200.0
+                                    }.addClass(Styles.customfont)
 
+                                    labelCoefAmpDop = label("Коэффициент амплитуды")
+                                    tfCoefAmpDop = textfield {
+                                        alignmentProperty().set(Pos.CENTER)
+                                    }.addClass(Styles.customfont)
+
+                                    labelFreqDop = label("Частота, Гц")
+                                    tfFreqDop = textfield {
+                                        alignmentProperty().set(Pos.CENTER)
                                     }.addClass(Styles.customfont)
                                 }
                             }
                         }
                     }
                 }
-            }.addClass(Styles.megaHard)
+            }.addClass(megaHard)
+        }
+        bottom = hbox {
+            comIndicate = circle(radius = 18) {
+                hboxConstraints {
+                    alignment = Pos.CENTER_LEFT
+                    hGrow = Priority.ALWAYS
+                    marginLeft = 14.0
+                    marginBottom = 8.0
+                }
+                fill = c("cyan")
+                stroke = c("black")
+                isSmooth = true
+            }
+            label("  Связь с преобразователем") {
+            }.addClass(Styles.blueTheme, megaHard)
+
+            hbox {
+                hboxConstraints {
+                    alignment = Pos.CENTER_RIGHT
+                    hGrow = Priority.ALWAYS
+                    marginRight = 14.0
+                    marginBottom = 8.0
+                }
+                label("Связь с прибором  ") {
+                }.addClass(Styles.blueTheme, megaHard)
+                comIndicateDevice = circle(radius = 18) {
+                    fill = c("cyan")
+                    stroke = c("black")
+                    isSmooth = true
+                }
+            }
         }
     }.addClass(Styles.blueTheme, medium)
 
@@ -356,7 +520,7 @@ class MainView : View("КВМ-120") {
         listOfValues.clear()
         thread {
             var realTime = 0.0
-            while (isStart) {
+            while (isStartRecord) {
                 listOfValues.add(tfValueOnGraph.text)
                 sleep(100)
                 realTime += 0.1
@@ -364,6 +528,8 @@ class MainView : View("КВМ-120") {
                     handleStop()
                 }
             }
+            btnRecord.isDisable = false
+            btnStopRecord.isDisable = true
             saveProtocolToDB(listOfValues)
         }
     }
@@ -396,6 +562,8 @@ class MainView : View("КВМ-120") {
     }
 
     private fun showGraph() {
+        var series = XYChart.Series<Number, Number>()
+        lineChart.data.add(series)
         thread {
             Platform.runLater {
                 setLabelYAxis()
@@ -403,24 +571,29 @@ class MainView : View("КВМ-120") {
                     resetLineChart()
                 }
             }
-            while (isStart) {
+            while (!isStop) {
                 Platform.runLater {
-                    when (comboboxNeedValue.selectedItem.toString()) {
-                        rms -> {
-                            series.data.add(XYChart.Data(realTime, CommunicationModel.uRms))
-                            tfValueOnGraph.text = String.format("%.4f", CommunicationModel.uRms)
-                        }
-                        avr -> {
-                            series.data.add(XYChart.Data(realTime, CommunicationModel.uAvr))
-                            tfValueOnGraph.text = String.format("%.4f", CommunicationModel.uAvr)
-                        }
-                        amp -> {
-                            series.data.add(XYChart.Data(realTime, CommunicationModel.uAmp))
-                            tfValueOnGraph.text = String.format("%.4f", CommunicationModel.uAmp)
-                        }
-                        freq -> {
-                            series.data.add(XYChart.Data(realTime, CommunicationModel.freq))
-                            tfValueOnGraph.text = String.format("%.4f", CommunicationModel.freq)
+                    if (isPause) {
+                        tfValueOnGraph.text = "0.0"
+                        series = XYChart.Series<Number, Number>()
+                    } else {
+                        when (comboboxNeedValue.selectedItem.toString()) {
+                            rms -> {
+                                series.data.add(XYChart.Data(realTime, CommunicationModel.uRms))
+                                tfValueOnGraph.text = String.format("%.4f", CommunicationModel.uRms)
+                            }
+                            avr -> {
+                                series.data.add(XYChart.Data(realTime, CommunicationModel.uAvr))
+                                tfValueOnGraph.text = String.format("%.4f", CommunicationModel.uAvr)
+                            }
+                            amp -> {
+                                series.data.add(XYChart.Data(realTime, CommunicationModel.uAmp))
+                                tfValueOnGraph.text = String.format("%.4f", CommunicationModel.uAmp)
+                            }
+                            freq -> {
+                                series.data.add(XYChart.Data(realTime, CommunicationModel.freq))
+                                tfValueOnGraph.text = String.format("%.4f", CommunicationModel.freq)
+                            }
                         }
                     }
                 }
@@ -434,11 +607,11 @@ class MainView : View("КВМ-120") {
         lineChart.xAxis.label = "Время, с"
         when {
             comboboxNeedValue.selectedItem.toString() == form -> {
-                lineChart.yAxis.label = "Напряжение, кВ"
+                lineChart.yAxis.label = "кВ"
                 lineChart.xAxis.label = "Время"
             }
             comboboxNeedValue.selectedItem.toString() != freq -> {
-                lineChart.yAxis.label = "Напряжение, кВ"
+                lineChart.yAxis.label = "кВ"
             }
             comboboxNeedValue.selectedItem.toString() == freq -> {
                 lineChart.yAxis.label = "Частота, Гц"

@@ -17,21 +17,37 @@ class GraphHistoryWindow : View("История графика") {
     private var series = XYChart.Series<Number, Number>()
     private var tfOt: TextField by singleAssign()
     private var tfDo: TextField by singleAssign()
-    private val values = Singleton.currentProtocol.values.removePrefix("[").removeSuffix("]")
+    private var values = Singleton.currentProtocol.values.removePrefix("[").removeSuffix("]")
         .split(", ").map { it.replace(',', '.') }.map(String::toDouble)
 
     override fun onDock() {
-        lineChart.title = Singleton.currentProtocol.toString()
+        var series = XYChart.Series<Number, Number>()
         series.data.clear()
         lineChart.data.clear()
-        val values = Singleton.currentProtocol.values.removePrefix("[").removeSuffix("]")
+        lineChart.title = Singleton.currentProtocol.toString()
+
+        values = Singleton.currentProtocol.values.removePrefix("[").removeSuffix("]")
             .split(", ").map { it.replace(',', '.') }.map(String::toDouble)
         var realTime = 0.0
+
+        var needAddSeriesToChart = true
         for (i in values.indices) {
-            series.data.add(XYChart.Data(realTime, values[i]))
-            realTime += 0.1
+
+            if (values[i] == 0.0) {
+                series = XYChart.Series<Number, Number>()
+                needAddSeriesToChart = true
+                realTime += 0.1
+            } else {
+                series.data.add(XYChart.Data(realTime, values[i]))
+                realTime += 0.1
+
+                if (needAddSeriesToChart) {
+                    lineChart.data.add(series)
+                    needAddSeriesToChart = false
+                }
+            }
         }
-        lineChart.data.add(series)
+
         tfOt.text = ""
         tfDo.text = ""
 
@@ -89,31 +105,43 @@ class GraphHistoryWindow : View("История графика") {
                     button("Ок") {
                         isDefaultButton = true
                         action {
-                            var ot1 = 0
-                            var do1 = 0
+                            var series = XYChart.Series<Number, Number>()
+                            var ot1 = 0.0
+                            var do1 = 0.0
                             try {
-                                ot1 = tfOt.text.toInt() * 10
-                                do1 = tfDo.text.toInt() * 10
+                                ot1 = tfOt.text.toDouble() * 10
+                                do1 = tfDo.text.toDouble() * 10
                             } catch (e: Exception) {
                                 Toast.makeText("Проверьте правильность введенных данных")
                                     .show(Toast.ToastType.ERROR)
                             }
-                            if (tfOt.text.toInt() * 10 < 0) {
-                                ot1 = 0
+                            if (tfOt.text.toDouble() * 10 < 0) {
+                                ot1 = 0.0
                             }
                             series.data.clear()
                             lineChart.data.clear()
-                            var realTime = ot1.toDouble() / 10
+                            var realTime = ot1 / 10
                             if (do1 > values.size) {
-                                do1 = values.size
+                                do1 = values.size.toDouble()
                                 tfDo.text = (values.size / 10).toString()
                             }
-                            for (i in ot1 until do1) {
-                                series.data.add(XYChart.Data(realTime, values[i]))
-                                realTime += 0.1
+                            var needAddSeriesToChart = true
+                            for (i in ot1.toInt() until do1.toInt()) {
+                                if (values[i] == 0.0) {
+                                    series = XYChart.Series<Number, Number>()
+                                    needAddSeriesToChart = true
+                                    realTime += 0.1
+                                } else {
+                                    series.data.add(XYChart.Data(realTime, values[i]))
+                                    realTime += 0.1
+
+                                    if (needAddSeriesToChart) {
+                                        lineChart.data.add(series)
+                                        needAddSeriesToChart = false
+                                    }
+                                }
                             }
                             lineChart.xAxis.isAutoRanging = true
-                            lineChart.data.add(series)
                         }
                     }
                 }

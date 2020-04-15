@@ -1,8 +1,6 @@
 package ru.avem.kvm120.communication.devices.avem4
 
-import java.util.*
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
+import com.ucicke.k2mod.modbus.procimg.SimpleRegister
 import org.slf4j.LoggerFactory
 import ru.avem.kvm120.communication.ModbusConnection
 import ru.avem.kvm120.communication.devices.Device
@@ -11,7 +9,9 @@ import ru.avem.kvm120.communication.devices.enums.DeviceType
 import ru.avem.kvm120.communication.devices.enums.UnitID
 import ru.avem.kvm120.communication.devices.parameters.DeviceParameter
 import ru.avem.kvm120.utils.toInt
-import com.ucicke.k2mod.modbus.procimg.SimpleRegister
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.util.*
 
 class AVEM4VoltmeterController(private val unitID: UnitID, observer: Observer) : Observable(), Device {
     companion object {
