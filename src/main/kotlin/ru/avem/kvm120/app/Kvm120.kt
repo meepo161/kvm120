@@ -22,8 +22,8 @@ class Kvm120 : App(MainView::class, Styles::class) {
         super.start(stage)
         FX.primaryStage.icons += Image("icon.png")
 //        stage.initStyle(StageStyle.TRANSPARENT)
-//        stage.isFullScreen = true
-//        stage.isResizable = false
+        stage.isFullScreen = true
+        stage.isResizable = false
     }
 
     private fun initializeSingletons() {

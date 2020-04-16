@@ -3,7 +3,6 @@ package ru.avem.kvm120.view
 import com.ucicke.k2mod.modbus.util.ModbusUtil.sleep
 import javafx.application.Platform
 import javafx.collections.ObservableList
-import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.chart.LineChart
 import javafx.scene.chart.NumberAxis
@@ -99,7 +98,6 @@ class MainView : View("КВМ-120") {
                 tfTimeAveraging.text =
                     String.format("%.1f", CommunicationModel.avem4VoltmeterController.readTimeAveraging())
             } catch (e: Exception) {
-                println("sout")
             }
         }
         controller.setValues()
@@ -149,88 +147,20 @@ class MainView : View("КВМ-120") {
                         }
                     }
                 }
-                menu("Информация") {
-                    menu("Отображение") {
-                        cmiRms = checkmenuitem("Действуйщее напряжение") {
-                            isSelected = true
-                            onAction = EventHandler {
-                                if (cmiRms.isSelected) {
-                                    tfRmsDop.show()
-                                    labelRmsDop.show()
-                                } else {
-                                    tfRmsDop.hide()
-                                    labelRmsDop.hide()
-                                }
-                            }
-                        }
-                        cmiAvr = checkmenuitem("Среднее напряжение") {
-                            isSelected = true
-                            onAction = EventHandler {
-                                if (cmiAvr.isSelected) {
-                                    tfAvrDop.show()
-                                    labelAvrDop.show()
-                                } else {
-                                    tfAvrDop.hide()
-                                    labelAvrDop.hide()
-                                }
-                            }
-                        }
-                        cmiAmp = checkmenuitem("Амплитудное напряжение") {
-                            isSelected = true
-                            onAction = EventHandler {
-                                if (cmiAmp.isSelected) {
-                                    tfAmpDop.show()
-                                    labelAmpDop.show()
-                                } else {
-                                    tfAmpDop.hide()
-                                    labelAmpDop.hide()
-                                }
-                            }
-                        }
-                        cmiCoef = checkmenuitem("Коэффицент формы") {
-                            isSelected = true
-                            onAction = EventHandler {
-                                if (cmiCoef.isSelected) {
-                                    tfCoefDop.show()
-                                    labelCoefDop.show()
-                                } else {
-                                    tfCoefDop.hide()
-                                    labelCoefDop.hide()
-                                }
-                            }
-                        }
-                        cmiCoefAmp = checkmenuitem("Коэффицент амплитуды") {
-                            isSelected = true
-                            onAction = EventHandler {
-                                if (cmiCoefAmp.isSelected) {
-                                    tfCoefAmpDop.show()
-                                    labelCoefAmpDop.show()
-                                } else {
-                                    tfCoefAmpDop.hide()
-                                    labelCoefAmpDop.hide()
-                                }
-                            }
-                        }
-                        cmiFreq = checkmenuitem("Частота") {
-                            isSelected = true
-                            onAction = EventHandler {
-                                if (cmiFreq.isSelected) {
-                                    tfFreqDop.show()
-                                    labelFreqDop.show()
-                                } else {
-                                    tfFreqDop.hide()
-                                    labelFreqDop.hide()
-                                }
-                            }
+                menu("Настройка") {
+                    item("Настройка отображения") {
+                        action {
+                            find<DisplaySettingsWindow>().openModal(
+                                modality = Modality.APPLICATION_MODAL, escapeClosesWindow = true,
+                                resizable = false, owner = this@MainView.currentWindow
+                            )
                         }
                     }
+                }
+                menu("Информация") {
                     item("Версия ПО") {
                         action {
-                            Toast.makeText(
-                                "Версия ПО: 1.0.3\n" +
-                                        "Дата: 15.04.2020"
-                            )
-                                .show(Toast.ToastType.INFORMATION)
+                            Toast.makeText("Версия ПО: 1.0.4\nДата: 16.04.2020").show(Toast.ToastType.INFORMATION)
                         }
                     }
                 }
@@ -289,7 +219,7 @@ class MainView : View("КВМ-120") {
                                 }
                             }
                             hbox(16.0, Pos.CENTER) {
-                                label("Время усреднения данных, мс:")
+                                label("Время усреднения данных, мс:"){}
                                 tfTimeAveraging = textfield {
                                     callKeyBoard()
                                     prefWidth = 300.0
@@ -351,6 +281,7 @@ class MainView : View("КВМ-120") {
                                             showGraph()
                                             isStart = true
                                             isPause = false
+                                            isStop = false
                                             btnStart.isDisable = true
                                             btnPause.isDisable = false
                                             btnStop.isDisable = false
