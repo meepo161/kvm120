@@ -32,8 +32,7 @@ class GraphHistoryWindow : View("История графика") {
 
         var needAddSeriesToChart = true
         for (i in values.indices) {
-
-            if (values[i] == 0.0) {
+            if (values[i] == 77.7) {
                 series = XYChart.Series<Number, Number>()
                 needAddSeriesToChart = true
                 realTime += 0.1
@@ -105,29 +104,64 @@ class GraphHistoryWindow : View("История графика") {
                     button("Ок") {
                         isDefaultButton = true
                         action {
+                            if (!tfOt.text.isNullOrEmpty() || !tfDo.text.isNullOrEmpty()) {
+                                var series = XYChart.Series<Number, Number>()
+                                var ot1 = 0.0
+                                var do1 = 0.0
+                                try {
+                                    ot1 = if (tfOt.text.replace(',', '.').toDouble() * 10 < 0) {
+                                        0.0
+                                    } else {
+                                        tfOt.text.replace(',', '.').toDouble() * 10
+                                    }
+                                    do1 = tfDo.text.replace(',', '.').toDouble() * 10
+                                } catch (e: Exception) {
+                                    Toast.makeText("Проверьте правильность введенных данных")
+                                        .show(Toast.ToastType.ERROR)
+                                }
+                                series.data.clear()
+                                lineChart.data.clear()
+                                var realTime = ot1 / 10
+                                if (do1 > values.size) {
+                                    do1 = values.size.toDouble()
+                                    tfDo.text = (values.size / 10).toString()
+                                }
+                                var needAddSeriesToChart = true
+                                for (i in ot1.toInt() until do1.toInt()) {
+                                    if (values[i] == 77.7) {
+                                        series = XYChart.Series<Number, Number>()
+                                        needAddSeriesToChart = true
+                                        realTime += 0.1
+                                    } else {
+                                        series.data.add(XYChart.Data(realTime, values[i]))
+                                        realTime += 0.1
+
+                                        if (needAddSeriesToChart) {
+                                            lineChart.data.add(series)
+                                            needAddSeriesToChart = false
+                                        }
+                                    }
+                                }
+                                lineChart.xAxis.isAutoRanging = true
+                            } else {
+                                Toast.makeText("Пустые поля. Заполните данные").show(Toast.ToastType.ERROR)
+                            }
+                        }
+                    }
+                    button("Сброс") {
+                        action {
                             var series = XYChart.Series<Number, Number>()
-                            var ot1 = 0.0
-                            var do1 = 0.0
-                            try {
-                                ot1 = tfOt.text.toDouble() * 10
-                                do1 = tfDo.text.toDouble() * 10
-                            } catch (e: Exception) {
-                                Toast.makeText("Проверьте правильность введенных данных")
-                                    .show(Toast.ToastType.ERROR)
-                            }
-                            if (tfOt.text.toDouble() * 10 < 0) {
-                                ot1 = 0.0
-                            }
                             series.data.clear()
                             lineChart.data.clear()
-                            var realTime = ot1 / 10
-                            if (do1 > values.size) {
-                                do1 = values.size.toDouble()
-                                tfDo.text = (values.size / 10).toString()
-                            }
+                            lineChart.title = Singleton.currentProtocol.toString()
+
+                            values = Singleton.currentProtocol.values.removePrefix("[").removeSuffix("]")
+                                .split(", ").map { it.replace(',', '.') }.map(String::toDouble)
+                            var realTime = 0.0
+
                             var needAddSeriesToChart = true
-                            for (i in ot1.toInt() until do1.toInt()) {
-                                if (values[i] == 0.0) {
+                            for (i in values.indices) {
+                                if (values[i] == 77.7) {
                                     series = XYChart.Series<Number, Number>()
                                     needAddSeriesToChart = true
                                     realTime += 0.1
@@ -141,7 +175,6 @@ class GraphHistoryWindow : View("История графика") {
                                     }
                                 }
                             }
-                            lineChart.xAxis.isAutoRanging = true
                         }
                     }
                 }

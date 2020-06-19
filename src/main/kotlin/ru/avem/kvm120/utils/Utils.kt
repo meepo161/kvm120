@@ -3,10 +3,7 @@ package ru.avem.kvm120.utils
 import javafx.event.EventHandler
 import javafx.scene.control.TextField
 import java.awt.Desktop
-import java.io.File
-import java.io.FileNotFoundException
-import java.io.FileOutputStream
-import java.io.InputStream
+import java.io.*
 import java.nio.file.Paths
 
 fun copyFileFromStream(_inputStream: InputStream, dest: File) {
@@ -29,5 +26,13 @@ fun TextField.callKeyBoard() {
         Desktop.getDesktop()
             .open(Paths.get("C:/Program Files/Common Files/Microsoft Shared/ink/TabTip.exe").toFile())
         requestFocus()
+    }
+}
+
+fun openFile(file: File) {
+    try {
+        Desktop.getDesktop().open(file)
+    } catch (e: IOException) {
+        e.printStackTrace()
     }
 }

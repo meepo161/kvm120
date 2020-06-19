@@ -33,9 +33,9 @@ class Styles : Stylesheet() {
 
         customfont {
             font = if (Toolkit.getDefaultToolkit().screenSize.height == 1080) {
-                loadFont("/font/GolosText.ttf", 96.0)!!
+                loadFont("/font/GolosText.ttf", 80.0)!!
             } else {
-                loadFont("/font/GolosText.ttf", 48.0)!!
+                loadFont("/font/GolosText.ttf", 40.0)!!
             }
 //            textFill = c("#ff0f0f")
         }

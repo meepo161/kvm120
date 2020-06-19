@@ -3,6 +3,7 @@ package ru.avem.kvm120.view
 import com.ucicke.k2mod.modbus.util.ModbusUtil.sleep
 import javafx.application.Platform
 import javafx.collections.ObservableList
+import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.chart.LineChart
 import javafx.scene.chart.NumberAxis
@@ -16,7 +17,11 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import ru.avem.kvm120.communication.CommunicationModel
 import ru.avem.kvm120.communication.ModbusConnection
 import ru.avem.kvm120.controllers.MainViewController
+import ru.avem.kvm120.database.entities.Dop
+import ru.avem.kvm120.database.entities.DopView
 import ru.avem.kvm120.database.entities.Protocol
+import ru.avem.kvm120.database.entities.ProtocolDot
+import ru.avem.kvm120.utils.Singleton.savedView
 import ru.avem.kvm120.utils.Toast
 import ru.avem.kvm120.utils.callKeyBoard
 import ru.avem.kvm120.view.Styles.Companion.medium
@@ -66,12 +71,15 @@ class MainView : View("КВМ-120") {
     private var amp = "Амплитудное"
     private var form = "Форма"
     private var freq = "Частота"
-    private val values: ObservableList<String> = observableList(rms, avr, amp, form, freq)
+    private var coefAmp = "Коэффицент амплитуды"
+    private var coefForm = "Коэффицент формы"
+    private val values: ObservableList<String> = observableList(rms, avr, amp, form, freq, coefAmp, coefForm)
     private var listOfValues = mutableListOf<String>()
-    private var btnTimeAveraging: Button by singleAssign()
-    private var btnStart: Button by singleAssign()
+    var btnTimeAveraging: Button by singleAssign()
+    var btnStart: Button by singleAssign()
     private var btnPause: Button by singleAssign()
     private var btnStop: Button by singleAssign()
+    private var checkBoxAuto: CheckBox by singleAssign()
     private var btnRecord: Button by singleAssign()
     private var btnStopRecord: Button by singleAssign()
     private var tfValueOnGraph: TextField by singleAssign()
@@ -87,6 +95,15 @@ class MainView : View("КВМ-120") {
     private var timeOut = 60.0
     var comIndicate: Circle by singleAssign()
     var comIndicateDevice: Circle by singleAssign()
+
+
+    init {
+        savedView = transaction {
+            Dop.find {
+                DopView.id eq 1
+            }.toList().observable()
+        }.first()
+    }
 
     override fun onBeforeShow() {
         if (!ModbusConnection.isModbusConnected) {
@@ -110,6 +127,39 @@ class MainView : View("КВМ-120") {
         btnStop.isDisable = true
         btnRecord.isDisable = true
         btnStopRecord.isDisable = true
+        showOrHideDopValues()
+    }
+
+    private fun showOrHideDopValues() {
+        tfRmsDop.isVisible = savedView.rmsDop
+        labelRmsDop.isVisible = savedView.rmsDop
+        tfRmsDop.isManaged = savedView.rmsDop
+        labelRmsDop.isManaged = savedView.rmsDop
+
+        tfAvrDop.isVisible = savedView.avrDop
+        labelAvrDop.isVisible = savedView.avrDop
+        tfAvrDop.isManaged = savedView.avrDop
+        labelAvrDop.isManaged = savedView.avrDop
+
+        tfAmpDop.isVisible = savedView.ampDop
+        labelAmpDop.isVisible = savedView.ampDop
+        tfAmpDop.isManaged = savedView.ampDop
+        labelAmpDop.isManaged = savedView.ampDop
+
+        tfCoefDop.isVisible = savedView.coefDop
+        labelCoefDop.isVisible = savedView.coefDop
+        tfCoefDop.isManaged = savedView.coefDop
+        labelCoefDop.isManaged = savedView.coefDop
+
+        tfCoefAmpDop.isVisible = savedView.coefAmpDop
+        labelCoefAmpDop.isVisible = savedView.coefAmpDop
+        tfCoefAmpDop.isManaged = savedView.coefAmpDop
+        labelCoefAmpDop.isManaged = savedView.coefAmpDop
+
+        tfFreqDop.isVisible = savedView.freqDop
+        labelFreqDop.isVisible = savedView.freqDop
+        tfFreqDop.isManaged = savedView.freqDop
+        labelFreqDop.isManaged = savedView.freqDop
     }
 
     override val root = borderpane {
@@ -128,6 +178,14 @@ class MainView : View("КВМ-120") {
                     item("Протоколы") {
                         action {
                             find<ProtocolListWindow>().openModal(
+                                modality = Modality.APPLICATION_MODAL, escapeClosesWindow = true,
+                                resizable = false, owner = this@MainView.currentWindow
+                            )
+                        }
+                    }
+                    item("Протоколы точек") {
+                        action {
+                            find<ProtocolDotListWindow>().openModal(
                                 modality = Modality.APPLICATION_MODAL, escapeClosesWindow = true,
                                 resizable = false, owner = this@MainView.currentWindow
                             )
@@ -219,7 +277,26 @@ class MainView : View("КВМ-120") {
                                 }
                             }
                             hbox(16.0, Pos.CENTER) {
-                                label("Время усреднения данных, мс:"){}
+                                button("Сохранить точку") {
+                                    action {
+                                        saveProtocolDotToDB()
+                                    }
+                                }
+
+                                button("Пауза") {
+                                    action {
+                                        if (text == "Старт") {
+                                            controller.isPausedValues = false
+                                            text = "Пауза"
+                                        } else {
+                                            controller.isPausedValues = true
+                                            text = "Старт"
+                                        }
+                                    }
+                                }
+                            }
+                            hbox(16.0, Pos.CENTER) {
+                                label("Время усреднения данных, мс:") {}
                                 tfTimeAveraging = textfield {
                                     callKeyBoard()
                                     prefWidth = 300.0
@@ -261,32 +338,56 @@ class MainView : View("КВМ-120") {
                             hbox(16.0, Pos.CENTER) {
                                 label("График:")
                                 comboboxNeedValue = combobox {
+                                    onAction = EventHandler {
+                                        if (selectedItem == form) {
+                                            checkBoxAuto.show()
+                                            btnRecord.hide()
+                                            btnStopRecord.hide()
+                                        } else {
+                                            checkBoxAuto.hide()
+                                            btnRecord.show()
+                                            btnStopRecord.show()
+                                        }
+                                    }
                                 }
                                 btnStart = button("Старт") {
                                     action {
-                                        if (!isPause) {
-                                            resetLineChart()
-                                            btnRecord.isDisable = false
-                                        }
-                                        if (comboboxNeedValue.selectionModel.selectedItem == form) {
-                                            showProgressIndicator()
-                                            thread {
-                                                isDisable = true
-                                                val listOfDots = CommunicationModel.avem4VoltmeterController.readDotsF()
-                                                drawGraphFormVoltage(listOfDots)
-                                                recordFormGraphInDB(listOfDots)
-                                                isDisable = false
+                                        setLabelYAxis()
+                                        if (CommunicationModel.avem4VoltmeterController.isResponding) {
+                                            if (!isPause) {
+                                                resetLineChart()
+                                                btnRecord.isDisable = false
+                                            }
+                                            if (comboboxNeedValue.selectionModel.selectedItem == form) {
+                                                thread {
+                                                    btnStop.isDisable = false
+                                                    isDisable = true
+                                                    do {
+                                                        val listOfDots =
+                                                            CommunicationModel.avem4VoltmeterController.readDotsF()
+                                                        drawGraphFormVoltage(listOfDots)
+                                                        recordFormGraphInDB(listOfDots)
+                                                        sleep(2000)
+                                                    } while (checkBoxAuto.isSelected)
+                                                    isDisable = false
+                                                    btnStop.isDisable = true
+                                                }
+                                            } else {
+                                                showGraph()
+                                                isStart = true
+                                                isPause = false
+                                                isStop = false
+                                                btnPause.isDisable = false
+                                                btnStop.isDisable = false
+                                                comboboxNeedValue.isDisable = true
                                             }
                                         } else {
-                                            showGraph()
-                                            isStart = true
-                                            isPause = false
-                                            isStop = false
-                                            btnStart.isDisable = true
-                                            btnPause.isDisable = false
-                                            btnStop.isDisable = false
-                                            comboboxNeedValue.isDisable = true
+                                            Toast.makeText("Нет связи с прибором").show(Toast.ToastType.ERROR)
                                         }
+                                    }
+                                }
+                                checkBoxAuto = checkbox("Авто") {
+                                    action {
                                     }
                                 }
                                 btnPause = button("Пауза") {
@@ -344,7 +445,7 @@ class MainView : View("КВМ-120") {
                                 }
                             }
                             lineChart = linechart("", NumberAxis(), NumberAxis()) {
-                                xAxis.label = "Время, с"
+                                xAxis.label = "Время"
                                 prefHeight = 600.0
                                 data.add(series)
                                 animated = false
@@ -398,6 +499,19 @@ class MainView : View("КВМ-120") {
                                     }.addClass(Styles.customfont)
                                 }
                             }
+                            hbox(16.0, Pos.CENTER) {
+                                button("Пауза") {
+                                    action {
+                                        if (text == "Старт") {
+                                            controller.isPausedDopValues = false
+                                            text = "Пауза"
+                                        } else {
+                                            controller.isPausedDopValues = true
+                                            text = "Старт"
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -436,7 +550,7 @@ class MainView : View("КВМ-120") {
         }
     }.addClass(Styles.blueTheme, medium)
 
-    private fun handleStop() {
+    fun handleStop() {
         isStart = false
         isPause = false
         isStop = true
@@ -445,6 +559,8 @@ class MainView : View("КВМ-120") {
         btnStop.isDisable = true
         btnRecord.isDisable = true
         comboboxNeedValue.isDisable = false
+        isStartRecord = false
+        checkBoxAuto.isSelected = false
     }
 
     private fun recordGraphInDB() {
@@ -452,7 +568,11 @@ class MainView : View("КВМ-120") {
         thread {
             var realTime = 0.0
             while (isStartRecord) {
-                listOfValues.add(tfValueOnGraph.text)
+                if (isPause) {
+                    listOfValues.add("77.7")
+                } else {
+                    listOfValues.add(tfValueOnGraph.text)
+                }
                 sleep(100)
                 realTime += 0.1
                 if (realTime > timeOut) {
@@ -488,7 +608,6 @@ class MainView : View("КВМ-120") {
             for (element in list1) {
                 series.data.add(XYChart.Data(realTime++, element))
             }
-            find<ProgressWindow>().close()
         }
     }
 
@@ -497,7 +616,6 @@ class MainView : View("КВМ-120") {
         lineChart.data.add(series)
         thread {
             Platform.runLater {
-                setLabelYAxis()
                 if (isStop) {
                     resetLineChart()
                 }
@@ -505,7 +623,7 @@ class MainView : View("КВМ-120") {
             while (!isStop) {
                 Platform.runLater {
                     if (isPause) {
-                        tfValueOnGraph.text = "0.0"
+                        tfValueOnGraph.text = "-"
                         series = XYChart.Series<Number, Number>()
                     } else {
                         when (comboboxNeedValue.selectedItem.toString()) {
@@ -525,6 +643,14 @@ class MainView : View("КВМ-120") {
                                 series.data.add(XYChart.Data(realTime, CommunicationModel.freq))
                                 tfValueOnGraph.text = String.format("%.4f", CommunicationModel.freq)
                             }
+                            coefAmp -> {
+                                series.data.add(XYChart.Data(realTime, CommunicationModel.coefAmp))
+                                tfValueOnGraph.text = String.format("%.4f", CommunicationModel.coefAmp)
+                            }
+                            coefForm -> {
+                                series.data.add(XYChart.Data(realTime, CommunicationModel.coef))
+                                tfValueOnGraph.text = String.format("%.4f", CommunicationModel.coef)
+                            }
                         }
                     }
                 }
@@ -535,17 +661,17 @@ class MainView : View("КВМ-120") {
     }
 
     private fun setLabelYAxis() {
-        lineChart.xAxis.label = "Время, с"
         when {
             comboboxNeedValue.selectedItem.toString() == form -> {
                 lineChart.yAxis.label = "кВ"
                 lineChart.xAxis.label = "Время"
             }
-            comboboxNeedValue.selectedItem.toString() != freq -> {
-                lineChart.yAxis.label = "кВ"
-            }
             comboboxNeedValue.selectedItem.toString() == freq -> {
                 lineChart.yAxis.label = "Частота, Гц"
+            }
+            comboboxNeedValue.selectedItem.toString() != freq -> {
+                lineChart.yAxis.label = "кВ"
+                lineChart.xAxis.label = "Время, сек"
             }
         }
     }
@@ -569,6 +695,26 @@ class MainView : View("КВМ-120") {
                 time = timeFormatter.format(unixTime).toString()
                 typeOfValue = comboboxNeedValue.selectedItem.toString()
                 values = list.toString()
+            }
+        }
+    }
+
+    private fun saveProtocolDotToDB() {
+        val dateFormatter = SimpleDateFormat("dd.MM.y")
+        val timeFormatter = SimpleDateFormat("HH:mm:ss")
+
+        val unixTime = System.currentTimeMillis()
+
+        transaction {
+            ProtocolDot.new {
+                dateDot = dateFormatter.format(unixTime).toString()
+                timeDot = timeFormatter.format(unixTime).toString()
+                rms = tfRms.text
+                avr = tfAvr.text
+                amp = tfAmp.text
+                freq = tfFreq.text
+                сoefAmp = tfCoefAmp.text
+                сoefDop = tfCoefDop.text
             }
         }
     }

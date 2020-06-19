@@ -3,6 +3,10 @@ package ru.avem.kvm120.view
 import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.control.CheckBox
+import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
+import ru.avem.kvm120.database.entities.DopView
+import ru.avem.kvm120.utils.Singleton.savedView
 import ru.avem.kvm120.view.Styles.Companion.megaHard
 import tornadofx.*
 
@@ -28,7 +32,7 @@ class DisplaySettingsWindow : View("Настройка отображения д
             }
             label("Выберите отображение дополнительных значений")
             cmiRms = checkbox("Действуйщее напряжение") {
-                isSelected = true
+                isSelected = savedView.rmsDop
                 onAction = EventHandler {
                     if (cmiRms.isSelected) {
                         view.tfRmsDop.show()
@@ -40,7 +44,7 @@ class DisplaySettingsWindow : View("Настройка отображения д
                 }
             }
             cmiAvr = checkbox("Среднее напряжение") {
-                isSelected = true
+                isSelected = savedView.avrDop
                 onAction = EventHandler {
                     if (cmiAvr.isSelected) {
                         view.tfAvrDop.show()
@@ -52,7 +56,7 @@ class DisplaySettingsWindow : View("Настройка отображения д
                 }
             }
             cmiAmp = checkbox("Амплитудное напряжение") {
-                isSelected = true
+                isSelected = savedView.ampDop
                 onAction = EventHandler {
                     if (cmiAmp.isSelected) {
                         view.tfAmpDop.show()
@@ -64,7 +68,7 @@ class DisplaySettingsWindow : View("Настройка отображения д
                 }
             }
             cmiCoef = checkbox("Коэффицент формы") {
-                isSelected = true
+                isSelected = savedView.coefDop
                 onAction = EventHandler {
                     if (cmiCoef.isSelected) {
                         view.tfCoefDop.show()
@@ -76,7 +80,7 @@ class DisplaySettingsWindow : View("Настройка отображения д
                 }
             }
             cmiCoefAmp = checkbox("Коэффицент амплитуды") {
-                isSelected = true
+                isSelected = savedView.coefAmpDop
                 onAction = EventHandler {
                     if (cmiCoefAmp.isSelected) {
                         view.tfCoefAmpDop.show()
@@ -88,7 +92,7 @@ class DisplaySettingsWindow : View("Настройка отображения д
                 }
             }
             cmiFreq = checkbox("Частота") {
-                isSelected = true
+                isSelected = savedView.freqDop
                 onAction = EventHandler {
                     if (cmiFreq.isSelected) {
                         view.tfFreqDop.show()
@@ -102,6 +106,18 @@ class DisplaySettingsWindow : View("Настройка отображения д
             hbox(0.0, Pos.CENTER) {
                 button("ОК") {
                     action {
+                        transaction {
+                            DopView.update({
+                                DopView.id eq 1
+                            }) {
+                                it[rmsDop] = cmiRms.isSelected
+                                it[avrDop] = cmiAvr.isSelected
+                                it[ampDop] = cmiAmp.isSelected
+                                it[coefDop] = cmiCoef.isSelected
+                                it[coefAmpDop] = cmiCoefAmp.isSelected
+                                it[freqDop] = cmiFreq.isSelected
+                            }
+                        }
                         close()
                     }
                 }

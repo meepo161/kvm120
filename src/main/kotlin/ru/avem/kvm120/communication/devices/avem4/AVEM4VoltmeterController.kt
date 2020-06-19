@@ -19,6 +19,7 @@ class AVEM4VoltmeterController(private val unitID: UnitID, observer: Observer) :
 
         const val U_RMS_REGISTER = 0x1010
         const val TIME_MEASURE = 0x10C8
+        const val KTR = 0x10CE
         const val SERIAL_NUMBER = 0x1108
         val DEVICE_ID = DeviceType.AVEM4Voltmeter
     }
@@ -185,8 +186,8 @@ class AVEM4VoltmeterController(private val unitID: UnitID, observer: Observer) :
     fun setTimeAveraging(time: Float) {
         val dataBuffer = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putFloat(time).flip() as ByteBuffer
         try {
-            ModbusConnection.writeSingleRegister(unitID.id, 0x10C8, SimpleRegister(dataBuffer.getShort(1)))
-            ModbusConnection.writeSingleRegister(unitID.id, 0x10C9, SimpleRegister(dataBuffer.getShort(0)))
+            ModbusConnection.writeSingleRegister(unitID.id, 0x10C9, SimpleRegister(dataBuffer.short))
+            ModbusConnection.writeSingleRegister(unitID.id, 0x10C8, SimpleRegister(dataBuffer.short))
         } catch (e: Exception) {
             isResponding = false
         }

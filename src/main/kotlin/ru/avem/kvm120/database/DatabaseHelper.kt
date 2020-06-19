@@ -13,7 +13,7 @@ fun validateDB() {
     TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
 
     transaction {
-        SchemaUtils.create(Users, ProtocolsTable)
+        SchemaUtils.create(Users, ProtocolsTable, DopView, ProtocolsDot)
     }
 
     transaction {
@@ -34,6 +34,25 @@ fun validateDB() {
                     time = "11:30:00"
                     typeOfValue = "Амплитудное значение"
                     values = "1"
+                }
+                Dop.new {
+                    rmsDop = true
+                    avrDop = true
+                    ampDop = true
+                    freqDop = false
+                    coefAmpDop = false
+                    coefDop = false
+                }
+
+                ProtocolDot.new {
+                    dateDot = "10.03.2020"
+                    timeDot = "11:30:00"
+                    rms = "1"
+                    avr = "2"
+                    amp = "3"
+                    freq = "4"
+                    сoefAmp = "5"
+                    сoefDop = "6"
                 }
             }
         }
