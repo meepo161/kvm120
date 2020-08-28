@@ -33,7 +33,7 @@ object ModbusConnection {
     var indicateCOM: ((COMState) -> Unit) = { COMState.CLOSE }
 
     init {
-        thread {
+        thread(isDaemon = true) {
             while (isAppRunning) {
                 if (!isSerialConnecting()) {
                     isModbusConnected = try {

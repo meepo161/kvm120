@@ -21,9 +21,11 @@ class Kvm120 : App(MainView::class, Styles::class) {
         stage.fullScreenExitKeyCombination = KeyCombination.NO_MATCH
         super.start(stage)
         FX.primaryStage.icons += Image("icon.png")
+        stage.maxHeight = 600.0
+        stage.maxWidth = 1024.0
 //        stage.initStyle(StageStyle.TRANSPARENT)
-        stage.isFullScreen = true
-        stage.isResizable = false
+//        stage.isFullScreen = true
+//        stage.isResizable = false
     }
 
     private fun initializeSingletons() {

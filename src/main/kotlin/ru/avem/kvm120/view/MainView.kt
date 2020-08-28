@@ -569,7 +569,7 @@ class MainView : View("КВМ-120") {
             var realTime = 0.0
             while (isStartRecord) {
                 if (isPause) {
-                    listOfValues.add("77.7")
+                    listOfValues.add("NaN")
                 } else {
                     listOfValues.add(tfValueOnGraph.text)
                 }

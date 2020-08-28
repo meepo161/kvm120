@@ -32,7 +32,7 @@ class GraphHistoryWindow : View("История графика") {
 
         var needAddSeriesToChart = true
         for (i in values.indices) {
-            if (values[i] == 77.7) {
+            if (values[i].isNaN()) {
                 series = XYChart.Series<Number, Number>()
                 needAddSeriesToChart = true
                 realTime += 0.1
@@ -128,7 +128,7 @@ class GraphHistoryWindow : View("История графика") {
                                 }
                                 var needAddSeriesToChart = true
                                 for (i in ot1.toInt() until do1.toInt()) {
-                                    if (values[i] == 77.7) {
+                                    if (values[i].isNaN()) {
                                         series = XYChart.Series<Number, Number>()
                                         needAddSeriesToChart = true
                                         realTime += 0.1
@@ -161,7 +161,7 @@ class GraphHistoryWindow : View("История графика") {
 
                             var needAddSeriesToChart = true
                             for (i in values.indices) {
-                                if (values[i] == 77.7) {
+                                if (values[i].isNaN()) {
                                     series = XYChart.Series<Number, Number>()
                                     needAddSeriesToChart = true
                                     realTime += 0.1

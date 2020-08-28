@@ -3,7 +3,6 @@ package ru.avem.kvm120.view
 import javafx.geometry.Pos
 import javafx.scene.text.FontWeight
 import tornadofx.*
-import java.awt.Toolkit
 
 class Styles : Stylesheet() {
     companion object {
@@ -32,11 +31,11 @@ class Styles : Stylesheet() {
         }
 
         customfont {
-            font = if (Toolkit.getDefaultToolkit().screenSize.height == 1080) {
-                loadFont("/font/GolosText.ttf", 80.0)!!
-            } else {
+//            font = if (Toolkit.getDefaultToolkit().screenSize.height == 1080) {
+//                loadFont("/font/GolosText.ttf", 80.0)!!
+//            } else {
                 loadFont("/font/GolosText.ttf", 40.0)!!
-            }
+//            }
 //            textFill = c("#ff0f0f")
         }
 
