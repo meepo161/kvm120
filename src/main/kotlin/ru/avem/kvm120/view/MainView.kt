@@ -22,11 +22,11 @@ import ru.avem.kvm120.database.entities.DopView
 import ru.avem.kvm120.database.entities.Protocol
 import ru.avem.kvm120.database.entities.ProtocolDot
 import ru.avem.kvm120.utils.Singleton.savedView
-import ru.avem.kvm120.utils.Toast
 import ru.avem.kvm120.utils.callKeyBoard
-import ru.avem.kvm120.view.Styles.Companion.medium
-import ru.avem.kvm120.view.Styles.Companion.megaHard
 import tornadofx.*
+import tornadofx.controlsfx.errorNotification
+import tornadofx.controlsfx.infoNotification
+import tornadofx.controlsfx.warningNotification
 import java.text.SimpleDateFormat
 import kotlin.concurrent.thread
 import kotlin.system.exitProcess
@@ -108,7 +108,12 @@ class MainView : View("КВМ-120") {
     override fun onBeforeShow() {
         if (!ModbusConnection.isModbusConnected) {
             Platform.runLater {
-                Toast.makeText("Подключите преобразователь").show(Toast.ToastType.ERROR)
+                warningNotification(
+                    "Предупреждение",
+                    "Подключите преобразователь",
+                    Pos.BOTTOM_CENTER,
+                    owner = this@MainView.currentWindow
+                )
             }
         } else {
             try {
@@ -175,7 +180,7 @@ class MainView : View("КВМ-120") {
                     }
                 }
                 menuBd = menu("База данных") {
-                    item("Протоколы") {
+                    item("Протоколы графиков") {
                         action {
                             find<ProtocolListWindow>().openModal(
                                 modality = Modality.APPLICATION_MODAL, escapeClosesWindow = true,
@@ -218,11 +223,18 @@ class MainView : View("КВМ-120") {
                 menu("Информация") {
                     item("Версия ПО") {
                         action {
-                            Toast.makeText("Версия ПО: 1.0.4\nДата: 16.04.2020").show(Toast.ToastType.INFORMATION)
+                            Platform.runLater {
+                                infoNotification(
+                                    "",
+                                    "Версия ПО: 1.0.0 Дата: 31.08.2020",
+                                    Pos.BOTTOM_CENTER,
+                                    owner = this@MainView.currentWindow
+                                )
+                            }
                         }
                     }
                 }
-            }.addClass(megaHard)
+            }.addClass(Styles.raspberryStyleMenu)
         }
         center {
             mainTabPane = tabpane {
@@ -238,26 +250,34 @@ class MainView : View("КВМ-120") {
                             }
                             hbox(32.0, Pos.CENTER) {
                                 vbox(16.0, Pos.CENTER) {
-                                    label("Действующее значение, кВ")
+                                    label("Действующее, кВ")
                                     tfRms = textfield {
                                         alignmentProperty().set(Pos.CENTER)
-                                        prefHeight = 200.0
-                                    }.addClass(Styles.customfont)
+                                        prefHeight = 60.0
+                                        prefWidth = 260.0
+                                        addClass(Styles.raspberryStyleDigit)
+                                        style = "-fx-padding: 0px;"
+                                    }
                                 }
                                 vbox(16.0, Pos.CENTER) {
-                                    label("Среднее значение, кВ")
+                                    label("Среднее, кВ")
                                     tfAvr = textfield {
                                         alignmentProperty().set(Pos.CENTER)
-                                        prefHeight = 200.0
-                                    }.addClass(Styles.customfont)
+                                        prefHeight = 60.0
+                                        prefWidth = 260.0
+                                        addClass(Styles.raspberryStyleDigit)
+                                        style = "-fx-padding: 0px;"
+                                    }
                                 }
                                 vbox(16.0, Pos.CENTER) {
-                                    label("Амлитудное значение, кВ")
+                                    label("Амлитудное, кВ")
                                     tfAmp = textfield {
                                         alignmentProperty().set(Pos.CENTER)
-                                        prefHeight = 200.0
-
-                                    }.addClass(Styles.customfont)
+                                        prefHeight = 60.0
+                                        prefWidth = 260.0
+                                        addClass(Styles.raspberryStyleDigit)
+                                        style = "-fx-padding: 0px;"
+                                    }
                                 }
                             }
                             hbox(32.0, Pos.CENTER) {
@@ -265,25 +285,35 @@ class MainView : View("КВМ-120") {
                                     label("Коэффициент амплитуды")
                                     tfCoefAmp = textfield {
                                         alignmentProperty().set(Pos.CENTER)
-                                        prefHeight = 200.0
-                                    }.addClass(Styles.customfont)
+                                        prefHeight = 60.0
+                                        prefWidth = 260.0
+                                        addClass(Styles.raspberryStyleDigit)
+                                        style = "-fx-padding: 0px;"
+                                    }
                                 }
                                 vbox(16.0, Pos.CENTER) {
                                     label("Частота, Гц")
                                     tfFreq = textfield {
                                         alignmentProperty().set(Pos.CENTER)
-                                        prefHeight = 200.0
-                                    }.addClass(Styles.customfont)
+                                        prefHeight = 60.0
+                                        prefWidth = 260.0
+                                        addClass(Styles.raspberryStyleDigit)
+                                        style = "-fx-padding: 0px;"
+                                    }
                                 }
                             }
                             hbox(16.0, Pos.CENTER) {
                                 button("Сохранить точку") {
+                                    prefHeight = 80.0
+                                    prefWidth = 220.0
                                     action {
                                         saveProtocolDotToDB()
                                     }
                                 }
 
                                 button("Пауза") {
+                                    prefHeight = 80.0
+                                    prefWidth = 220.0
                                     action {
                                         if (text == "Старт") {
                                             controller.isPausedValues = false
@@ -298,9 +328,10 @@ class MainView : View("КВМ-120") {
                             hbox(16.0, Pos.CENTER) {
                                 label("Время усреднения данных, мс:") {}
                                 tfTimeAveraging = textfield {
+                                    alignmentProperty().set(Pos.CENTER)
+                                    prefWidth = 80.0
                                     callKeyBoard()
-                                    prefWidth = 300.0
-                                }.addClass(Styles.customfont, Styles.bigger)
+                                }
                                 btnTimeAveraging = button("Применить") {
                                     action {
                                         CommunicationModel.avem4VoltmeterController.entryConfigurationMod()
@@ -308,8 +339,14 @@ class MainView : View("КВМ-120") {
                                         try {
                                             timeAveraging = tfTimeAveraging.text.replace(',', '.').toFloat()
                                         } catch (e: Exception) {
-                                            Toast.makeText("Неверное значение времени усреднения")
-                                                .show(Toast.ToastType.ERROR)
+                                            Platform.runLater {
+                                                errorNotification(
+                                                    "Ошибка",
+                                                    "Неверное значение времени усреднения",
+                                                    Pos.BOTTOM_CENTER,
+                                                    owner = this@MainView.currentWindow
+                                                )
+                                            }
                                         }
                                         CommunicationModel.avem4VoltmeterController.setTimeAveraging(timeAveraging)
                                         Platform.runLater {
@@ -330,10 +367,10 @@ class MainView : View("КВМ-120") {
                     anchorpane {
                         vbox(spacing = 8.0) {
                             anchorpaneConstraints {
-                                leftAnchor = 16.0
-                                rightAnchor = 16.0
-                                topAnchor = 16.0
-                                bottomAnchor = 16.0
+                                leftAnchor = 4.0
+                                rightAnchor = 4.0
+                                topAnchor = 4.0
+                                bottomAnchor = 4.0
                             }
                             hbox(16.0, Pos.CENTER) {
                                 label("График:")
@@ -382,7 +419,14 @@ class MainView : View("КВМ-120") {
                                                 comboboxNeedValue.isDisable = true
                                             }
                                         } else {
-                                            Toast.makeText("Нет связи с прибором").show(Toast.ToastType.ERROR)
+                                            Platform.runLater {
+                                                warningNotification(
+                                                    "Предупреждение",
+                                                    "Нет связи с прибором",
+                                                    Pos.BOTTOM_CENTER,
+                                                    owner = this@MainView.currentWindow
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -409,7 +453,7 @@ class MainView : View("КВМ-120") {
                             hbox(16.0, Pos.CENTER) {
                                 tfValueOnGraph = textfield {
                                     alignmentProperty().set(Pos.CENTER)
-                                }.addClass(Styles.customfont, Styles.bigger)
+                                }
                                 btnRecord = button("Начать запись") {
                                     action {
                                         when {
@@ -470,37 +514,70 @@ class MainView : View("КВМ-120") {
                                     labelRmsDop = label("Действующее значение, кВ")
                                     tfRmsDop = textfield {
                                         alignmentProperty().set(Pos.CENTER)
-                                    }.addClass(Styles.customfont)
+                                        prefHeight = 60.0
+                                        prefWidth = 260.0
+                                        addClass(Styles.raspberryStyleDigit)
+                                        style = "-fx-padding: 0px;"
+                                    }
 
                                     labelAvrDop = label("Среднее значение, кВ")
                                     tfAvrDop = textfield {
                                         alignmentProperty().set(Pos.CENTER)
-                                    }.addClass(Styles.customfont)
+                                        prefHeight = 60.0
+                                        prefWidth = 260.0
+                                        addClass(Styles.raspberryStyleDigit)
+                                        style = "-fx-padding: 0px;"
+                                    }
 
                                     labelAmpDop = label("Амлитудное значение, кВ")
                                     tfAmpDop = textfield {
                                         alignmentProperty().set(Pos.CENTER)
-                                    }.addClass(Styles.customfont)
+                                        prefHeight = 60.0
+                                        prefWidth = 260.0
+                                        addClass(Styles.raspberryStyleDigit)
+                                        style = "-fx-padding: 0px;"
+                                    }
                                 }
                                 vbox(8.0, Pos.CENTER) {
                                     labelCoefDop = label("Коэффицент формы")
                                     tfCoefDop = textfield {
                                         alignmentProperty().set(Pos.CENTER)
-                                    }.addClass(Styles.customfont)
+                                        prefHeight = 60.0
+                                        prefWidth = 260.0
+                                        addClass(Styles.raspberryStyleDigit)
+                                        style = "-fx-padding: 0px;"
+                                    }
 
                                     labelCoefAmpDop = label("Коэффициент амплитуды")
                                     tfCoefAmpDop = textfield {
                                         alignmentProperty().set(Pos.CENTER)
-                                    }.addClass(Styles.customfont)
+                                        prefHeight = 60.0
+                                        prefWidth = 260.0
+                                        addClass(Styles.raspberryStyleDigit)
+                                        style = "-fx-padding: 0px;"
+                                    }
 
                                     labelFreqDop = label("Частота, Гц")
                                     tfFreqDop = textfield {
                                         alignmentProperty().set(Pos.CENTER)
-                                    }.addClass(Styles.customfont)
+                                        prefHeight = 60.0
+                                        prefWidth = 260.0
+                                        addClass(Styles.raspberryStyleDigit)
+                                        style = "-fx-padding: 0px;"
+                                    }
                                 }
                             }
                             hbox(16.0, Pos.CENTER) {
+                                button("Сохранить точку") {
+                                    prefHeight = 80.0
+                                    prefWidth = 220.0
+                                    action {
+                                        saveProtocolDotToDB()
+                                    }
+                                }
                                 button("Пауза") {
+                                    prefHeight = 80.0
+                                    prefWidth = 220.0
                                     action {
                                         if (text == "Старт") {
                                             controller.isPausedDopValues = false
@@ -515,7 +592,7 @@ class MainView : View("КВМ-120") {
                         }
                     }
                 }
-            }.addClass(megaHard)
+            }
         }
         bottom = hbox {
             comIndicate = circle(radius = 18) {
@@ -530,7 +607,7 @@ class MainView : View("КВМ-120") {
                 isSmooth = true
             }
             label("  Связь с преобразователем") {
-            }.addClass(Styles.blueTheme, megaHard)
+            }
 
             hbox {
                 hboxConstraints {
@@ -540,7 +617,7 @@ class MainView : View("КВМ-120") {
                     marginBottom = 8.0
                 }
                 label("Связь с прибором  ") {
-                }.addClass(Styles.blueTheme, megaHard)
+                }
                 comIndicateDevice = circle(radius = 18) {
                     fill = c("cyan")
                     stroke = c("black")
@@ -548,7 +625,7 @@ class MainView : View("КВМ-120") {
                 }
             }
         }
-    }.addClass(Styles.blueTheme, medium)
+    }.addClass(Styles.blueTheme, Styles.raspberryStyle)
 
     fun handleStop() {
         isStart = false

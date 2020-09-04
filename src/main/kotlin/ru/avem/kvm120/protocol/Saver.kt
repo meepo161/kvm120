@@ -19,6 +19,9 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileNotFoundException
 
+
+
+
 const val TO_DESIRED_ROW = 0
 
 fun saveProtocolDotAsWorkbook(protocol: ProtocolDot, path: String = "protocolDot.xlsx") {
@@ -93,7 +96,7 @@ fun saveProtocolAsWorkbook(protocol: Protocol, path: String = "protocol.xlsx") {
                 }
             }
             fillParameters(wb, protocol.values)
-            drawLineChart(wb)
+//            drawLineChart(wb)
             val outStream = ByteArrayOutputStream()
             wb.write(outStream)
             outStream.close()

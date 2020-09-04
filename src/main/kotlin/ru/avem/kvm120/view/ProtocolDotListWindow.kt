@@ -18,7 +18,7 @@ import tornadofx.*
 import tornadofx.controlsfx.confirmNotification
 import java.io.File
 
-class ProtocolDotListWindow : View("Протоколы") {
+class ProtocolDotListWindow : View("Протоколы точек") {
     private var tableViewDotProtocols: TableView<ProtocolDot> by singleAssign()
     private lateinit var protocols: ObservableList<ProtocolDot>
     override fun onDock() {
@@ -30,8 +30,8 @@ class ProtocolDotListWindow : View("Протоколы") {
     }
 
     override val root = anchorpane {
-        prefWidth = 1200.0
-        prefHeight = 720.0
+        prefWidth = 900.0
+        prefHeight = 500.0
 
         vbox(spacing = 16.0) {
             anchorpaneConstraints {
@@ -156,5 +156,5 @@ class ProtocolDotListWindow : View("Протоколы") {
                 }
             }
         }
-    }.addClass(Styles.extraHard, Styles.blueTheme)
+    }.addClass(Styles.blueTheme, Styles.raspberryStyle)
 }

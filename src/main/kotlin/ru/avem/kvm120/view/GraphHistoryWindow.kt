@@ -1,14 +1,15 @@
 package ru.avem.kvm120.view
 
+import javafx.application.Platform
 import javafx.geometry.Pos
 import javafx.scene.chart.LineChart
 import javafx.scene.chart.NumberAxis
 import javafx.scene.chart.XYChart
 import javafx.scene.control.TextField
 import ru.avem.kvm120.utils.Singleton
-import ru.avem.kvm120.utils.Toast
 import ru.avem.kvm120.utils.callKeyBoard
 import tornadofx.*
+import tornadofx.controlsfx.errorNotification
 
 class GraphHistoryWindow : View("История графика") {
     private var form = "Форма"
@@ -66,8 +67,8 @@ class GraphHistoryWindow : View("История графика") {
     }
 
     override val root = anchorpane {
-        prefWidth = 1200.0
-        prefHeight = 720.0
+        prefWidth = 900.0
+        prefHeight = 500.0
         hbox(spacing = 16.0) {
             alignmentProperty().set(Pos.CENTER)
             anchorpaneConstraints {
@@ -116,8 +117,14 @@ class GraphHistoryWindow : View("История графика") {
                                     }
                                     do1 = tfDo.text.replace(',', '.').toDouble() * 10
                                 } catch (e: Exception) {
-                                    Toast.makeText("Проверьте правильность введенных данных")
-                                        .show(Toast.ToastType.ERROR)
+                                    Platform.runLater {
+                                        errorNotification(
+                                            "Ошибка",
+                                            "Проверьте правильность введенных данных",
+                                            Pos.BOTTOM_CENTER,
+                                            owner = this@GraphHistoryWindow.currentWindow
+                                        )
+                                    }
                                 }
                                 series.data.clear()
                                 lineChart.data.clear()
@@ -144,7 +151,14 @@ class GraphHistoryWindow : View("История графика") {
                                 }
                                 lineChart.xAxis.isAutoRanging = true
                             } else {
-                                Toast.makeText("Пустые поля. Заполните данные").show(Toast.ToastType.ERROR)
+                                Platform.runLater {
+                                    errorNotification(
+                                        "Ошибка",
+                                        "Пустые поля. Заполните данные",
+                                        Pos.BOTTOM_CENTER,
+                                        owner = this@GraphHistoryWindow.currentWindow
+                                    )
+                                }
                             }
                         }
                     }
@@ -180,5 +194,5 @@ class GraphHistoryWindow : View("История графика") {
                 }
             }
         }
-    }.addClass(Styles.blueTheme, Styles.extraHard)
+    }.addClass(Styles.blueTheme, Styles.raspberryStyle)
 }

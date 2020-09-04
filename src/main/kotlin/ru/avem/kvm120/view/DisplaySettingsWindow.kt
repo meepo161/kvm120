@@ -7,7 +7,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 import ru.avem.kvm120.database.entities.DopView
 import ru.avem.kvm120.utils.Singleton.savedView
-import ru.avem.kvm120.view.Styles.Companion.megaHard
+import ru.avem.kvm120.view.Styles.Companion.raspberryStyle
 import tornadofx.*
 
 
@@ -123,5 +123,5 @@ class DisplaySettingsWindow : View("Настройка отображения д
                 }
             }
         }
-    }.addClass(Styles.blueTheme, megaHard)
+    }.addClass(Styles.blueTheme, raspberryStyle)
 }

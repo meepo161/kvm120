@@ -8,11 +8,16 @@ class Styles : Stylesheet() {
     companion object {
         val lineChart by cssclass()
         val blueTheme by cssclass()
+        val blueThemeSmall by cssclass()
         val customfont by cssclass()
         val medium by cssclass()
         val hard by cssclass()
         val extraHard by cssclass()
-        val megaHard by cssclass()
+        val raspberryStyle by cssclass()
+        val raspberryStyleDigit by cssclass()
+        val raspberryStyleDigitDop by cssclass()
+        val raspberryStyleDigitForFraph by cssclass()
+        val raspberryStyleMenu by cssclass()
         val bigger by cssclass()
         val stopStart by cssclass()
         val anchorPaneBorders by cssclass()
@@ -25,48 +30,63 @@ class Styles : Stylesheet() {
     }
 
     init {
+        raspberryStyle {
+            fontSize = 22.px
+            fontWeight = FontWeight.EXTRA_BOLD
+        }
+
+        raspberryStyleDigit {
+            font = loadFont("/font/GolosText.ttf", 32.0)!!
+        }
+        raspberryStyleDigitDop {
+            font = loadFont("/font/GolosText.ttf", 26.0)!!
+        }
+
+        raspberryStyleDigitForFraph {
+            font = loadFont("/font/GolosText.ttf", 24.0)!!
+        }
+
+        raspberryStyleMenu {
+            fontSize = 34.px
+        }
 
         blueTheme {
             baseColor = c("#115a98")
+            font = loadFont("/font/GolosText.ttf", 16.0)!!
+        }
+
+        blueThemeSmall {
+            baseColor = c("#115a98")
+            font = loadFont("/font/GolosText.ttf", 15.0)!!
         }
 
         customfont {
 //            font = if (Toolkit.getDefaultToolkit().screenSize.height == 1080) {
 //                loadFont("/font/GolosText.ttf", 80.0)!!
 //            } else {
-                loadFont("/font/GolosText.ttf", 40.0)!!
+//                loadFont("/font/GolosText.ttf", 40.0)!!
 //            }
 //            textFill = c("#ff0f0f")
         }
 
         medium {
-            fontSize = 18.px
-            fontWeight = FontWeight.BOLD
         }
 
         hard {
-            fontSize = 20.px
-            fontWeight = FontWeight.BOLD
         }
 
         extraHard {
-            fontSize = 24.px
-            fontWeight = FontWeight.EXTRA_BOLD
         }
 
-        megaHard {
-            fontSize = 28.px
-            fontWeight = FontWeight.EXTRA_BOLD
-        }
 
         bigger {
-            fontSize = 60.px
-            fontWeight = FontWeight.EXTRA_BOLD
+//            fontSize = 60.px
+//            fontWeight = FontWeight.EXTRA_BOLD
         }
 
         stopStart {
-            fontSize = 60.px
-            fontWeight = FontWeight.EXTRA_BOLD
+//            fontSize = 60.px
+//            fontWeight = FontWeight.EXTRA_BOLD
         }
 
         powerButtons {
@@ -106,7 +126,7 @@ class Styles : Stylesheet() {
         tableColumn {
             alignment = Pos.CENTER
             fontWeight = FontWeight.EXTRA_BOLD
-            fontSize = 22.px
+            fontSize = 20.px
         }
 
         tableRowCell {

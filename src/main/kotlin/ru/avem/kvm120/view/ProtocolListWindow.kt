@@ -1,5 +1,6 @@
 package ru.avem.kvm120.view
 
+import javafx.application.Platform
 import javafx.collections.ObservableList
 import javafx.event.EventHandler
 import javafx.geometry.Pos
@@ -13,11 +14,12 @@ import ru.avem.kvm120.database.entities.ProtocolsTable
 import ru.avem.kvm120.protocol.saveProtocolAsWorkbook
 import ru.avem.kvm120.utils.Singleton
 import ru.avem.kvm120.utils.callKeyBoard
+import ru.avem.kvm120.utils.openFile
 import tornadofx.*
 import tornadofx.controlsfx.confirmNotification
 import java.io.File
 
-class ProtocolListWindow : View("Протоколы") {
+class ProtocolListWindow : View("Протоколы графиков") {
     private var tableViewProtocols: TableView<Protocol> by singleAssign()
     private lateinit var protocols: ObservableList<Protocol>
     override fun onDock() {
@@ -29,8 +31,8 @@ class ProtocolListWindow : View("Протоколы") {
 
 
     override val root = anchorpane {
-        prefWidth = 1200.0
-        prefHeight = 720.0
+        prefWidth = 900.0
+        prefHeight = 500.0
 
         vbox(spacing = 16.0) {
             anchorpaneConstraints {
@@ -91,6 +93,20 @@ class ProtocolListWindow : View("Протоколы") {
                         }
                     }
                 }
+                button("Открыть таблицу") {
+                    action {
+                        if (tableViewProtocols.selectedItem != null) {
+                            Singleton.currentProtocol = transaction {
+                                Protocol.find {
+                                    ProtocolsTable.id eq tableViewProtocols.selectedItem!!.id
+                                }.toList().observable()
+                            }.first()
+                            close()
+                            saveProtocolAsWorkbook(Singleton.currentProtocol)
+                            openFile(File("protocol.xlsx"))
+                        }
+                    }
+                }
                 button("Сохранить как") {
                     action {
                         if (tableViewProtocols.selectedItem != null) {
@@ -105,12 +121,15 @@ class ProtocolListWindow : View("Протоколы") {
 
                             if (files.isNotEmpty()) {
                                 saveProtocolAsWorkbook(tableViewProtocols.selectedItem!!, files.first().absolutePath)
-                                confirmNotification(
-                                    "Готово",
-                                    "Успешно сохранено",
-                                    Pos.BOTTOM_CENTER,
-                                    owner = this@ProtocolListWindow.currentWindow
-                                )
+
+                                Platform.runLater {
+                                    confirmNotification(
+                                        "Готово",
+                                        "Успешно сохранено",
+                                        Pos.BOTTOM_CENTER,
+                                        owner = this@ProtocolListWindow.currentWindow
+                                    )
+                                }
                             }
                         }
                     }
@@ -129,12 +148,14 @@ class ProtocolListWindow : View("Протоколы") {
                                     val file = File(dir, "${it.id.value}.xlsx")
                                     saveProtocolAsWorkbook(it, file.absolutePath)
                                 }
-                                confirmNotification(
-                                    "Готово",
-                                    "Успешно сохранено",
-                                    Pos.BOTTOM_CENTER,
-                                    owner = this@ProtocolListWindow.currentWindow
-                                )
+                                Platform.runLater {
+                                    confirmNotification(
+                                        "Готово",
+                                        "Успешно сохранено",
+                                        Pos.BOTTOM_CENTER,
+                                        owner = this@ProtocolListWindow.currentWindow
+                                    )
+                                }
                             }
                         }
                     }
@@ -156,5 +177,5 @@ class ProtocolListWindow : View("Протоколы") {
                 }
             }
         }
-    }.addClass(Styles.extraHard, Styles.blueTheme)
+    }.addClass(Styles.blueThemeSmall, Styles.raspberryStyle)
 }
